@@ -625,6 +625,96 @@
     align-items: center;
     gap: 8px;
   }
+
+  /* ─── SETTINGS / GROQ ─── */
+  .settings-card {
+    background: var(--surface);
+    border: 1px solid var(--surface2);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+  .settings-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 8px;
+  }
+  .settings-desc {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.6;
+    margin-bottom: 12px;
+  }
+  .settings-desc a { color: var(--accent3); }
+  .settings-input {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--surface2);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .settings-input:focus { border-color: var(--accent); }
+  .settings-input::placeholder { color: var(--muted); }
+  .settings-save {
+    margin-top: 10px;
+    width: 100%;
+    padding: 11px;
+    background: var(--accent);
+    color: #0a0a0f;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .settings-status {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    margin-top: 6px;
+    text-align: center;
+    height: 14px;
+  }
+  .settings-status.ok { color: var(--accent); }
+  .settings-status.err { color: var(--danger); }
+
+  .groq-badge {
+    display: inline-block;
+    background: rgba(127,255,110,0.1);
+    border: 1px solid rgba(127,255,110,0.3);
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    padding: 3px 10px;
+    margin-bottom: 12px;
+    letter-spacing: 1px;
+  }
+  .groq-badge.missing {
+    background: rgba(255,79,79,0.1);
+    border-color: rgba(255,79,79,0.3);
+    color: var(--danger);
+  }
+
+  .transcribing-msg {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
 </style>
 </head>
 <body>
@@ -716,6 +806,30 @@
   </div>
 </div>
 
+
+<!-- VIEW: SETTINGS -->
+<div class="view" id="view-settings">
+  <div class="settings-card">
+    <span class="settings-label">GROQ API KEY (FOR TRANSCRIPTION)</span>
+    <div id="groqBadge" class="groq-badge missing">⚠ Key not set — transcription off</div>
+    <div class="settings-desc">
+      Groq runs Whisper and works on ALL phones/browsers.<br>
+      Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create. No credit card needed.
+    </div>
+    <input class="settings-input" id="groqKeyInput" type="password" placeholder="gsk_..." autocomplete="off" />
+    <button class="settings-save" onclick="saveGroqKey()">Save Key</button>
+    <div class="settings-status" id="groqStatus"></div>
+  </div>
+
+  <div class="settings-card">
+    <span class="settings-label">HOW TRANSCRIPTION WORKS</span>
+    <div class="settings-desc">
+      After you stop recording, audio is sent to Groq's Whisper model for accurate transcription. This works on Samsung, iPhone, and any browser.<br><br>
+      Without a Groq key, live transcription via browser is attempted (only works on Chrome desktop).
+    </div>
+  </div>
+</div>
+
 <!-- NAV -->
 <nav>
   <button class="nav-btn active" id="nav-home" onclick="switchView('home')">
@@ -725,6 +839,10 @@
   <button class="nav-btn" id="nav-history" onclick="switchView('history')">
     <span class="nav-icon">📼</span>
     <span class="nav-label">HISTORY</span>
+  </button>
+  <button class="nav-btn" id="nav-settings" onclick="switchView('settings')">
+    <span class="nav-icon">⚙️</span>
+    <span class="nav-label">SETTINGS</span>
   </button>
 </nav>
 
@@ -773,6 +891,11 @@ async function callAI(prompt, maxTokens) {
   throw lastError || new Error('All models failed');
 }
 const STORAGE_KEY = 'speakup_sessions';
+const GROQ_KEY_STORAGE = 'speakup_groq_key';
+
+function getGroqKey() {
+  return localStorage.getItem(GROQ_KEY_STORAGE) || '';
+}
 
 // ─── STATE ────────────────────────────────────────────────
 let currentTopic = '';
@@ -791,7 +914,41 @@ window.onload = function() {
   buildWaveform();
   updateStats();
   updateStreak();
+  loadGroqKeyUI();
 };
+
+function loadGroqKeyUI() {
+  const key = getGroqKey();
+  if (key) {
+    document.getElementById('groqKeyInput').value = key;
+    document.getElementById('groqBadge').className = 'groq-badge ok';
+    document.getElementById('groqBadge').textContent = '✓ Groq key saved — Whisper active';
+  }
+}
+
+function saveGroqKey() {
+  const val = document.getElementById('groqKeyInput').value.trim();
+  const status = document.getElementById('groqStatus');
+  if (!val.startsWith('gsk_') && val.length > 0) {
+    status.className = 'settings-status err';
+    status.textContent = 'Key should start with gsk_...';
+    return;
+  }
+  if (!val) {
+    localStorage.removeItem(GROQ_KEY_STORAGE);
+    document.getElementById('groqBadge').className = 'groq-badge missing';
+    document.getElementById('groqBadge').textContent = '⚠ Key not set — transcription off';
+    status.className = 'settings-status err';
+    status.textContent = 'Key cleared';
+    return;
+  }
+  localStorage.setItem(GROQ_KEY_STORAGE, val);
+  document.getElementById('groqBadge').className = 'groq-badge ok';
+  document.getElementById('groqBadge').textContent = '✓ Groq key saved — Whisper active';
+  status.className = 'settings-status ok';
+  status.textContent = 'Saved!';
+  setTimeout(() => { status.textContent = ''; }, 2000);
+}
 
 function buildWaveform() {
   const wf = document.getElementById('waveform');
@@ -996,33 +1153,76 @@ function updateTranscriptDisplay() {
 }
 
 // ─── FINISH SESSION ────────────────────────────────────────
-function finishSession() {
+async function finishSession() {
   stopRecording();
 
-  // Wait for MediaRecorder to flush
-  setTimeout(() => {
-    const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const audioBase64 = e.target.result;
-      
-      const session = {
-        id: Date.now(),
-        date: new Date().toISOString(),
-        topic: currentTopic,
-        duration: elapsedSeconds,
-        transcript: finalTranscript.trim() || '[No transcript available]',
-        audio: audioBase64
-      };
+  const finishBtn = document.getElementById('finishBtn');
+  finishBtn.disabled = true;
+  finishBtn.textContent = 'Saving...';
 
-      saveSession(session);
-      showToast('✓ Session saved!');
-      
-      setTimeout(() => switchView('home'), 800);
+  // Wait for MediaRecorder to flush
+  await new Promise(r => setTimeout(r, 500));
+
+  const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+
+  // Show transcribing message
+  const tcEl = document.getElementById('transcriptContent');
+  const groqKey = getGroqKey();
+
+  let transcriptText = finalTranscript.trim();
+
+  if (groqKey) {
+    tcEl.innerHTML = '<div class="transcribing-msg"><span class="spinner"></span>Transcribing with Whisper...</div>';
+    try {
+      transcriptText = await groqTranscribe(audioBlob, groqKey);
+    } catch(e) {
+      console.error('Groq transcription failed:', e);
+      transcriptText = finalTranscript.trim() || '[Transcription failed: ' + e.message + ']';
+    }
+    tcEl.textContent = transcriptText;
+  }
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    const audioBase64 = e.target.result;
+    const session = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      topic: currentTopic,
+      duration: elapsedSeconds,
+      transcript: transcriptText || '[No transcript available]',
+      audio: audioBase64
     };
-    reader.readAsDataURL(audioBlob);
-  }, 400);
+    saveSession(session);
+    showToast('✓ Session saved!');
+    setTimeout(() => switchView('home'), 800);
+  };
+  reader.readAsDataURL(audioBlob);
+}
+
+async function groqTranscribe(audioBlob, key) {
+  const formData = new FormData();
+  // Groq accepts webm
+  formData.append('file', audioBlob, 'recording.webm');
+  formData.append('model', 'whisper-large-v3-turbo');
+  formData.append('response_format', 'json');
+  formData.append('language', 'en');
+
+  const resp = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+    method: 'POST',
+    headers: {
+      'Authorization': 'Bearer ' + key
+    },
+    body: formData
+  });
+
+  if (!resp.ok) {
+    const err = await resp.text();
+    throw new Error('HTTP ' + resp.status + ': ' + err);
+  }
+
+  const data = await resp.json();
+  return (data.text || '').trim();
 }
 
 // ─── STORAGE ──────────────────────────────────────────────
