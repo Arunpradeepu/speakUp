@@ -1044,7 +1044,17 @@ async function startRecording() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
     
-    mediaRecorder = new MediaRecorder(stream);
+    // Detect best supported format (Samsung/Android needs mp4 or ogg, not webm)
+    const mimeType = [
+      'audio/mp4',
+      'audio/webm;codecs=opus',
+      'audio/webm',
+      'audio/ogg;codecs=opus',
+      'audio/ogg',
+    ].find(m => MediaRecorder.isTypeSupported(m)) || '';
+
+    mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
+    window._recordingMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
     audioChunks = [];
     
     mediaRecorder.ondataavailable = e => {
@@ -1160,31 +1170,43 @@ async function finishSession() {
   finishBtn.disabled = true;
   finishBtn.textContent = 'Saving...';
 
-  // Wait for MediaRecorder to flush
-  await new Promise(r => setTimeout(r, 500));
+  // Wait for MediaRecorder to fully flush all chunks
+  await new Promise(r => setTimeout(r, 800));
 
-  const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+  const mimeType = window._recordingMimeType || 'audio/webm';
+  const audioBlob = new Blob(audioChunks, { type: mimeType });
+  console.log('Audio blob:', audioBlob.size, 'bytes, type:', mimeType);
 
-  // Show transcribing message
   const tcEl = document.getElementById('transcriptContent');
   const groqKey = getGroqKey();
-
   let transcriptText = finalTranscript.trim();
 
-  if (groqKey) {
+  if (groqKey && audioBlob.size > 1000) {
+    finishBtn.textContent = 'Transcribing...';
     tcEl.innerHTML = '<div class="transcribing-msg"><span class="spinner"></span>Transcribing with Whisper...</div>';
     try {
-      transcriptText = await groqTranscribe(audioBlob, groqKey);
+      transcriptText = await groqTranscribe(audioBlob, groqKey, mimeType);
+      tcEl.textContent = transcriptText;
     } catch(e) {
       console.error('Groq transcription failed:', e);
       transcriptText = finalTranscript.trim() || '[Transcription failed: ' + e.message + ']';
+      tcEl.textContent = transcriptText;
     }
-    tcEl.textContent = transcriptText;
+  } else if (groqKey && audioBlob.size <= 1000) {
+    transcriptText = '[Recording too short or empty]';
   }
 
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const audioBase64 = e.target.result;
+  finishBtn.textContent = 'Saving...';
+
+  // Always save regardless of transcription result
+  try {
+    const audioBase64 = await new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = e => resolve(e.target.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(audioBlob);
+    });
+
     const session = {
       id: Date.now(),
       date: new Date().toISOString(),
@@ -1195,34 +1217,72 @@ async function finishSession() {
     };
     saveSession(session);
     showToast('✓ Session saved!');
-    setTimeout(() => switchView('home'), 800);
-  };
-  reader.readAsDataURL(audioBlob);
+    setTimeout(() => switchView('home'), 600);
+  } catch(e) {
+    console.error('Save failed:', e);
+    // Save without audio if FileReader fails
+    const session = {
+      id: Date.now(),
+      date: new Date().toISOString(),
+      topic: currentTopic,
+      duration: elapsedSeconds,
+      transcript: transcriptText || '[No transcript available]',
+      audio: null
+    };
+    saveSession(session);
+    showToast('✓ Session saved (no audio)');
+    setTimeout(() => switchView('home'), 600);
+  }
+
+  finishBtn.disabled = false;
+  finishBtn.textContent = '✓ Finish & Save Session';
 }
 
-async function groqTranscribe(audioBlob, key) {
+async function groqTranscribe(audioBlob, key, mimeType) {
+  // Pick correct file extension for Groq based on mime type
+  const extMap = {
+    'audio/mp4': 'm4a',
+    'audio/webm': 'webm',
+    'audio/ogg': 'ogg',
+    'audio/mpeg': 'mp3',
+  };
+  const baseMime = (mimeType || 'audio/webm').split(';')[0];
+  const ext = extMap[baseMime] || 'webm';
+  const filename = 'recording.' + ext;
+
+  console.log('Sending to Groq:', filename, audioBlob.size, 'bytes');
+
   const formData = new FormData();
-  // Groq accepts webm
-  formData.append('file', audioBlob, 'recording.webm');
+  formData.append('file', audioBlob, filename);
   formData.append('model', 'whisper-large-v3-turbo');
   formData.append('response_format', 'json');
   formData.append('language', 'en');
 
-  const resp = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-    method: 'POST',
-    headers: {
-      'Authorization': 'Bearer ' + key
-    },
-    body: formData
-  });
+  // 30 second timeout
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 30000);
 
-  if (!resp.ok) {
-    const err = await resp.text();
-    throw new Error('HTTP ' + resp.status + ': ' + err);
+  try {
+    const resp = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + key },
+      body: formData,
+      signal: controller.signal
+    });
+    clearTimeout(timeout);
+
+    if (!resp.ok) {
+      const err = await resp.text();
+      throw new Error('Groq HTTP ' + resp.status + ': ' + err);
+    }
+
+    const data = await resp.json();
+    return (data.text || '').trim();
+  } catch(e) {
+    clearTimeout(timeout);
+    if (e.name === 'AbortError') throw new Error('Transcription timed out after 30s');
+    throw e;
   }
-
-  const data = await resp.json();
-  return (data.text || '').trim();
 }
 
 // ─── STORAGE ──────────────────────────────────────────────
