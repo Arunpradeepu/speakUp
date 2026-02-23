@@ -810,6 +810,18 @@
 <!-- VIEW: SETTINGS -->
 <div class="view" id="view-settings">
   <div class="settings-card">
+    <span class="settings-label">OPENROUTER API KEY (FOR TOPICS &amp; AI POLISH)</span>
+    <div id="orBadge" class="groq-badge missing">⚠ Key not set — topics &amp; AI Polish off</div>
+    <div class="settings-desc">
+      100% free. Get your key at <a href="https://openrouter.ai/settings/keys" target="_blank">openrouter.ai/settings/keys</a> → Create Key. No credit card needed.<br><br>
+      Only free models are used. Zero cost, ever.
+    </div>
+    <input class="settings-input" id="orKeyInput" type="password" placeholder="sk-or-v1-..." autocomplete="off" />
+    <button class="settings-save" onclick="saveORKey()">Save Key</button>
+    <div class="settings-status" id="orStatus"></div>
+  </div>
+
+  <div class="settings-card">
     <span class="settings-label">GROQ API KEY (FOR TRANSCRIPTION)</span>
     <div id="groqBadge" class="groq-badge missing">⚠ Key not set — transcription off</div>
     <div class="settings-desc">
@@ -850,24 +862,28 @@
 
 <script>
 // ─── CONFIG ───────────────────────────────────────────────
-const OPENROUTER_API_KEY = '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';
+const OR_KEY_STORAGE = 'speakup_or_key';
+function getORKey() {
+  return localStorage.getItem(OR_KEY_STORAGE) || '';
+}
 const MODELS = [
+  'meta-llama/llama-3.3-8b-instruct:free',
   'meta-llama/llama-3.2-3b-instruct:free',
   'google/gemma-3-4b-it:free',
   'mistralai/mistral-7b-instruct:free',
-  'qwen/qwen3-0.5b:free',
-  'google/gemma-3-1b-it:free',
+  'qwen/qwen3-1.7b:free',
 ];
 
 // Call OpenRouter with automatic fallback through free models
 async function callAI(prompt, maxTokens) {
+  if (!getORKey()) throw new Error('NO_KEY');
   let lastError = null;
   for (const model of MODELS) {
     try {
       const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer ' + OPENROUTER_API_KEY,
+          'Authorization': 'Bearer ' + getORKey(),
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
@@ -877,13 +893,23 @@ async function callAI(prompt, maxTokens) {
         })
       });
       const data = await resp.json();
+
+      // Check for auth error — no point retrying other models
+      if (resp.status === 401 || resp.status === 403) {
+        const msg = (data.error && data.error.message) || 'Invalid API key';
+        throw new Error('Auth failed: ' + msg + '. Check your OpenRouter key.');
+      }
+
       if (resp.ok && data.choices && data.choices[0] && data.choices[0].message) {
         return data.choices[0].message.content.trim();
       }
-      // 429 or provider error → try next model
+
+      // 429 rate limit or provider error → try next model
       lastError = new Error((data.error && data.error.message) || ('HTTP ' + resp.status));
       console.warn('Model', model, 'failed:', lastError.message, '— trying next...');
     } catch(e) {
+      // Re-throw auth errors immediately
+      if (e.message && e.message.startsWith('Auth failed')) throw e;
       lastError = e;
       console.warn('Model', model, 'threw:', e.message);
     }
@@ -915,7 +941,44 @@ window.onload = function() {
   updateStats();
   updateStreak();
   loadGroqKeyUI();
+  loadORKeyUI();
 };
+
+function loadORKeyUI() {
+  const key = getORKey();
+  const badge = document.getElementById('orBadge');
+  const input = document.getElementById('orKeyInput');
+  if (key) {
+    input.value = key;
+    badge.className = 'groq-badge ok';
+    badge.textContent = '✓ OpenRouter key saved — Topics & AI Polish active';
+  }
+}
+
+function saveORKey() {
+  const val = document.getElementById('orKeyInput').value.trim();
+  const status = document.getElementById('orStatus');
+  const badge = document.getElementById('orBadge');
+  if (val && !val.startsWith('sk-or-')) {
+    status.className = 'settings-status err';
+    status.textContent = 'Key should start with sk-or-...';
+    return;
+  }
+  if (!val) {
+    localStorage.removeItem(OR_KEY_STORAGE);
+    badge.className = 'groq-badge missing';
+    badge.textContent = '⚠ Key not set — topics & AI Polish off';
+    status.className = 'settings-status err';
+    status.textContent = 'Key cleared';
+    return;
+  }
+  localStorage.setItem(OR_KEY_STORAGE, val);
+  badge.className = 'groq-badge ok';
+  badge.textContent = '✓ OpenRouter key saved — Topics & AI Polish active';
+  status.className = 'settings-status ok';
+  status.textContent = 'Saved!';
+  setTimeout(() => { status.textContent = ''; }, 2000);
+}
 
 function loadGroqKeyUI() {
   const key = getGroqKey();
@@ -1001,6 +1064,14 @@ async function generateTopic() {
   display.textContent = 'thinking of something interesting...';
 
   try {
+    if (!getORKey()) {
+      display.className = 'topic-text topic-placeholder';
+      display.textContent = 'Add your OpenRouter key in ⚙️ Settings to generate topics.';
+      document.getElementById('startRecordBtn').disabled = true;
+      btn.disabled = false;
+      btn.innerHTML = '🎲 Generate Random Topic';
+      return;
+    }
     const result = await callAI(
       'Give me ONE interesting and thought-provoking topic for a 2-5 minute impromptu speech or conversation practice. The topic should be engaging, broadly relatable, and help someone practice communication. Just give the topic title/prompt, nothing else. No numbering, no explanation. Make it specific and interesting, not generic. Examples of style: "The last time you changed your mind about something important" or "A skill everyone should learn but rarely does" or "Your relationship with social media". Now give a new unique one.',
       80
@@ -1464,6 +1535,11 @@ async function toggleAiPolish(id) {
     return;
   }
 
+  if (!getORKey()) {
+    contentEl.innerHTML = '<span style="color:var(--muted);font-size:11px">Add your OpenRouter key in ⚙️ Settings to use AI Polish.</span>';
+    return;
+  }
+
   // Get transcript from our map (populated during renderHistory)
   const transcript = transcriptMap[id] || '';
 
@@ -1487,7 +1563,11 @@ async function toggleAiPolish(id) {
     aiPolishCache[id] = paragraphs;
   } catch(e) {
     console.error('AI Polish error:', e);
-    contentEl.innerHTML = '<span style="color:var(--danger);font-size:11px">Error: ' + e.message + '</span>';
+    let errMsg = e.message || 'Unknown error';
+    if (errMsg === 'NO_KEY' || errMsg.includes('Auth failed') || errMsg.includes('user not found') || errMsg.includes('401')) {
+      errMsg = 'Add your OpenRouter key in ⚙️ Settings first.';
+    }
+    contentEl.innerHTML = '<span style="color:var(--danger);font-size:11px">' + errMsg + '</span>';
   }
 
   btn.classList.remove('loading');
