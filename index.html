@@ -30,7 +30,6 @@
     padding-bottom: env(safe-area-inset-bottom);
   }
 
-  /* Noise texture overlay */
   body::before {
     content: '';
     position: fixed;
@@ -41,7 +40,6 @@
     opacity: 0.5;
   }
 
-  /* ─── HEADER ─── */
   header {
     padding: 48px 24px 24px;
     position: relative;
@@ -75,11 +73,9 @@
     font-weight: 600;
   }
 
-  /* ─── MAIN VIEWS ─── */
   .view { display: none; padding: 0 24px; }
   .view.active { display: block; }
 
-  /* ─── HOME / TOPIC VIEW ─── */
   .topic-area {
     background: var(--surface);
     border: 1px solid var(--surface2);
@@ -129,7 +125,33 @@
     line-height: 1.5;
   }
 
-  /* ─── BUTTONS ─── */
+  /* Topic progress badge */
+  .topic-progress {
+    margin-top: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .topic-progress-bar {
+    flex: 1;
+    height: 3px;
+    background: var(--surface2);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .topic-progress-fill {
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+  .topic-progress-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
   .btn {
     width: 100%;
     padding: 18px 24px;
@@ -166,13 +188,20 @@
     font-weight: 400;
     font-size: 14px;
   }
+  .btn-warning {
+    background: transparent;
+    color: var(--accent2);
+    border: 1px solid rgba(255,110,180,0.3);
+    font-weight: 400;
+    font-size: 13px;
+    padding: 12px 24px;
+  }
   .btn:disabled {
     opacity: 0.4;
     cursor: not-allowed;
   }
   .btn + .btn { margin-top: 10px; }
 
-  /* ─── RECORD VIEW ─── */
   .record-topic {
     background: var(--surface);
     border-left: 3px solid var(--accent);
@@ -194,7 +223,6 @@
     font-weight: 400;
   }
 
-  /* Waveform */
   .waveform-container {
     background: var(--surface);
     border-radius: var(--radius);
@@ -223,7 +251,6 @@
     to { height: 60px; }
   }
 
-  /* Timer */
   .timer {
     text-align: center;
     font-family: 'DM Mono', monospace;
@@ -243,7 +270,6 @@
     margin-bottom: 24px;
   }
 
-  /* Record button */
   .record-btn-wrap {
     display: flex;
     justify-content: center;
@@ -288,7 +314,6 @@
     50% { box-shadow: 0 0 0 16px rgba(255,79,79,0.05); }
   }
 
-  /* Transcript live */
   .transcript-live {
     background: var(--surface);
     border-radius: var(--radius);
@@ -308,13 +333,8 @@
     display: block;
     margin-bottom: 8px;
   }
-  .transcript-live .tl-content {
-    color: var(--text);
-  }
-  .transcript-live .tl-interim {
-    color: var(--muted);
-    font-style: italic;
-  }
+  .transcript-live .tl-content { color: var(--text); }
+  .transcript-live .tl-interim { color: var(--muted); font-style: italic; }
   .transcript-live .cursor {
     display: inline-block;
     width: 2px; height: 14px;
@@ -325,7 +345,6 @@
   }
   @keyframes blink { 50% { opacity: 0; } }
 
-  /* ─── HISTORY VIEW ─── */
   .history-empty {
     text-align: center;
     padding: 60px 24px;
@@ -357,9 +376,7 @@
     justify-content: space-between;
     align-items: flex-start;
   }
-  .session-meta {
-    flex: 1;
-  }
+  .session-meta { flex: 1; }
   .session-date {
     font-family: 'DM Mono', monospace;
     font-size: 10px;
@@ -399,10 +416,7 @@
     border-radius: 8px;
     padding: 12px;
   }
-  .session-audio {
-    margin-top: 12px;
-    width: 100%;
-  }
+  .session-audio { margin-top: 12px; width: 100%; }
   .session-audio audio {
     width: 100%;
     border-radius: 8px;
@@ -423,8 +437,6 @@
   }
   .session-delete:active { opacity: 1; }
 
-
-  /* ─── NAV ─── */
   nav {
     position: fixed;
     bottom: 0;
@@ -448,10 +460,7 @@
     padding: 4px;
     transition: color 0.2s;
   }
-  .nav-btn .nav-icon {
-    font-size: 22px;
-    line-height: 1;
-  }
+  .nav-btn .nav-icon { font-size: 22px; line-height: 1; }
   .nav-btn .nav-label {
     font-family: 'DM Mono', monospace;
     font-size: 9px;
@@ -461,7 +470,6 @@
   }
   .nav-btn.active .nav-label { color: var(--accent); }
 
-  /* ─── MISC ─── */
   .spacer { height: 90px; }
 
   .stats-row {
@@ -500,7 +508,6 @@
     margin-bottom: 14px;
   }
 
-  /* Saving indicator */
   .save-toast {
     position: fixed;
     top: 20px; left: 50%;
@@ -518,7 +525,6 @@
   }
   .save-toast.show { transform: translateX(-50%) translateY(0); }
 
-  /* Spinner */
   .spinner {
     display: inline-block;
     width: 14px; height: 14px;
@@ -531,7 +537,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* Wave bars animation when recording */
   .wave-bar.active:nth-child(1) { animation-delay: 0s; animation-duration: 0.4s; }
   .wave-bar.active:nth-child(2) { animation-delay: 0.05s; animation-duration: 0.5s; }
   .wave-bar.active:nth-child(3) { animation-delay: 0.1s; animation-duration: 0.3s; }
@@ -626,7 +631,6 @@
     gap: 8px;
   }
 
-  /* ─── SETTINGS / GROQ ─── */
   .settings-card {
     background: var(--surface);
     border: 1px solid var(--surface2);
@@ -715,6 +719,26 @@
     gap: 8px;
     margin-top: 4px;
   }
+
+  /* All topics done state */
+  .all-done-msg {
+    text-align: center;
+    padding: 20px 0 10px;
+  }
+  .all-done-msg .done-icon {
+    font-size: 36px;
+    display: block;
+    margin-bottom: 8px;
+  }
+  .all-done-msg p {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.7;
+  }
+  .all-done-msg p strong {
+    color: var(--accent2);
+  }
 </style>
 </head>
 <body>
@@ -727,7 +751,6 @@
   <div class="day-badge">Day <span id="streakDay">—</span> of your journey</div>
 </header>
 
-<!-- TOAST -->
 <div class="save-toast" id="toast">✓ Session saved!</div>
 
 <!-- VIEW: HOME -->
@@ -752,15 +775,24 @@
   <div class="topic-area">
     <div class="topic-label">SPEAK ABOUT</div>
     <div class="topic-text topic-placeholder" id="topicDisplay">
-      Tap the button below to get a random topic, then record yourself speaking about it for as long as you want.
+      Tap the button below to get your next unique topic. Each topic is shown only once.
+    </div>
+    <div class="topic-progress">
+      <div class="topic-progress-bar">
+        <div class="topic-progress-fill" id="progressFill" style="width:0%"></div>
+      </div>
+      <span class="topic-progress-label" id="progressLabel">0 / 70</span>
     </div>
   </div>
 
   <button class="btn btn-primary" id="generateBtn" onclick="generateTopic()">
-    🎲 Generate Random Topic
+    🎲 Get Next Topic
   </button>
   <button class="btn btn-secondary" id="startRecordBtn" onclick="goToRecord()" disabled>
     🎙 Start Speaking
+  </button>
+  <button class="btn btn-warning" id="resetTopicsBtn" onclick="resetTopics()" style="display:none">
+    🔄 Reset All Topics
   </button>
 </div>
 
@@ -771,9 +803,7 @@
     <span id="recordTopicLabel">—</span>
   </div>
 
-  <div class="waveform-container" id="waveform">
-    <!-- Bars generated by JS -->
-  </div>
+  <div class="waveform-container" id="waveform"></div>
 
   <div class="timer" id="timer">0:00</div>
   <div class="timer-label" id="timerLabel">TAP TO BEGIN</div>
@@ -806,12 +836,11 @@
   </div>
 </div>
 
-
 <!-- VIEW: SETTINGS -->
 <div class="view" id="view-settings">
   <div class="settings-card">
-    <span class="settings-label">OPENROUTER API KEY (FOR TOPICS &amp; AI POLISH)</span>
-    <div id="orBadge" class="groq-badge missing">⚠ Key not set — topics &amp; AI Polish off</div>
+    <span class="settings-label">OPENROUTER API KEY (FOR AI POLISH)</span>
+    <div id="orBadge" class="groq-badge missing">⚠ Key not set — AI Polish off</div>
     <div class="settings-desc">
       100% free. Get your key at <a href="https://openrouter.ai/settings/keys" target="_blank">openrouter.ai/settings/keys</a> → Create Key. No credit card needed.<br><br>
       Only free models are used. Zero cost, ever.
@@ -834,15 +863,12 @@
   </div>
 
   <div class="settings-card">
-    <span class="settings-label">HOW TRANSCRIPTION WORKS</span>
-    <div class="settings-desc">
-      After you stop recording, audio is sent to Groq's Whisper model for accurate transcription. This works on Samsung, iPhone, and any browser.<br><br>
-      Without a Groq key, live transcription via browser is attempted (only works on Chrome desktop).
-    </div>
+    <span class="settings-label">TOPIC PROGRESS</span>
+    <div class="settings-desc" id="settingsTopicProgress">Loading...</div>
+    <button class="settings-save" style="background:var(--danger)" onclick="resetTopics()">Reset All Topics</button>
   </div>
 </div>
 
-<!-- NAV -->
 <nav>
   <button class="nav-btn active" id="nav-home" onclick="switchView('home')">
     <span class="nav-icon">🏠</span>
@@ -861,11 +887,148 @@
 <div class="spacer"></div>
 
 <script>
-// ─── CONFIG ───────────────────────────────────────────────
+// ─── TOPIC LIST ──────────────────────────────────────────────────────────────
+const MASTER_TOPICS = [
+  { "topic": "A moment that changed how I think", "visited": false },
+  { "topic": "Is comfort zone a trap?", "visited": false },
+  { "topic": "Failure is the best teacher – agree or disagree", "visited": false },
+  { "topic": "One habit that changed my life", "visited": false },
+  { "topic": "Is discipline more important than motivation?", "visited": false },
+  { "topic": "Social media: blessing or distraction?", "visited": false },
+  { "topic": "Why consistency beats talent", "visited": false },
+  { "topic": "Should success be redefined?", "visited": false },
+  { "topic": "Is comparison ever healthy?", "visited": false },
+  { "topic": "My definition of freedom", "visited": false },
+  { "topic": "The impact of smartphones on attention span", "visited": false },
+  { "topic": "Is AI making humans lazy?", "visited": false },
+  { "topic": "Online learning vs classroom learning", "visited": false },
+  { "topic": "Why mental health matters", "visited": false },
+  { "topic": "Is multitasking a myth?", "visited": false },
+  { "topic": "Privacy in the digital age", "visited": false },
+  { "topic": "Should exams define intelligence?", "visited": false },
+  { "topic": "The rise of creator economy", "visited": false },
+  { "topic": "Are we addicted to instant gratification?", "visited": false },
+  { "topic": "Remote work: future or fad?", "visited": false },
+  { "topic": "What school failed to teach us", "visited": false },
+  { "topic": "Is money equal to happiness?", "visited": false },
+  { "topic": "The pressure of expectations", "visited": false },
+  { "topic": "Why saying no is powerful", "visited": false },
+  { "topic": "Fear: enemy or guide?", "visited": false },
+  { "topic": "The role of failure in success", "visited": false },
+  { "topic": "Should passion drive career choices?", "visited": false },
+  { "topic": "The importance of self-awareness", "visited": false },
+  { "topic": "Why people resist change", "visited": false },
+  { "topic": "Is risk-taking necessary for growth?", "visited": false },
+  { "topic": "The influence of movies on youth", "visited": false },
+  { "topic": "Is discipline declining in modern society?", "visited": false },
+  { "topic": "The power of first impressions", "visited": false },
+  { "topic": "Should failures be celebrated?", "visited": false },
+  { "topic": "The value of time in our lives", "visited": false },
+  { "topic": "Is overthinking a weakness?", "visited": false },
+  { "topic": "Why habits matter more than goals", "visited": false },
+  { "topic": "Is loneliness a modern epidemic?", "visited": false },
+  { "topic": "The importance of communication skills", "visited": false },
+  { "topic": "Does confidence come from competence?", "visited": false },
+  { "topic": "The role of luck in success", "visited": false },
+  { "topic": "Is being busy the same as being productive?", "visited": false },
+  { "topic": "Why simplicity is underrated", "visited": false },
+  { "topic": "The impact of peer pressure", "visited": false },
+  { "topic": "Is perfectionism harmful?", "visited": false },
+  { "topic": "Why people fear public speaking", "visited": false },
+  { "topic": "The importance of listening skills", "visited": false },
+  { "topic": "Is failure permanent?", "visited": false },
+  { "topic": "Why self-discipline is hard", "visited": false },
+  { "topic": "Does age define maturity?", "visited": false },
+  { "topic": "The role of mentors in life", "visited": false },
+  { "topic": "Is confidence fakeable?", "visited": false },
+  { "topic": "The danger of comfort-driven life", "visited": false },
+  { "topic": "Why consistency is boring but powerful", "visited": false },
+  { "topic": "Is silence a form of communication?", "visited": false },
+  { "topic": "Why people avoid hard conversations", "visited": false },
+  { "topic": "Is honesty always the best policy?", "visited": false },
+  { "topic": "The role of mindset in success", "visited": false },
+  { "topic": "Why action beats planning", "visited": false },
+  { "topic": "Is self-improvement overrated?", "visited": false },
+  { "topic": "The importance of emotional intelligence", "visited": false },
+  { "topic": "Why motivation fades", "visited": false },
+  { "topic": "Is discipline a skill or trait?", "visited": false },
+  { "topic": "Why people quit too early", "visited": false },
+  { "topic": "Is confidence louder or quieter?", "visited": false },
+  { "topic": "The power of daily routines", "visited": false },
+  { "topic": "Why comfort kills growth", "visited": false },
+  { "topic": "Is self-talk shaping our reality?", "visited": false },
+  { "topic": "Why clarity is more important than speed", "visited": false },
+  { "topic": "What success means to me", "visited": false }
+];
+
+const TOPICS_KEY = 'speakup_topics';
+const STORAGE_KEY = 'speakup_sessions';
 const OR_KEY_STORAGE = 'speakup_or_key';
-function getORKey() {
-  return localStorage.getItem(OR_KEY_STORAGE) || '';
+const GROQ_KEY_STORAGE = 'speakup_groq_key';
+
+// ─── TOPIC STATE MANAGEMENT ──────────────────────────────────────────────────
+function loadTopics() {
+  try {
+    const saved = localStorage.getItem(TOPICS_KEY);
+    if (saved) return JSON.parse(saved);
+  } catch(e) {}
+  // First time: use master list
+  return MASTER_TOPICS.map(t => ({ ...t }));
 }
+
+function saveTopics(topics) {
+  localStorage.setItem(TOPICS_KEY, JSON.stringify(topics));
+}
+
+function getUnvisitedTopics() {
+  return loadTopics().filter(t => !t.visited);
+}
+
+function markTopicVisited(topicText) {
+  const topics = loadTopics();
+  const idx = topics.findIndex(t => t.topic === topicText);
+  if (idx !== -1) {
+    topics[idx].visited = true;
+    saveTopics(topics);
+  }
+}
+
+function resetTopics() {
+  if (!confirm('Reset all 70 topics? They will all be available again as "unvisited".')) return;
+  const fresh = MASTER_TOPICS.map(t => ({ ...t }));
+  saveTopics(fresh);
+  updateProgressUI();
+  showToast('✓ All topics reset!');
+  // Hide reset button if visible
+  updateResetBtnVisibility();
+}
+
+function getTopicStats() {
+  const topics = loadTopics();
+  const total = topics.length;
+  const visited = topics.filter(t => t.visited).length;
+  return { total, visited, remaining: total - visited };
+}
+
+function updateProgressUI() {
+  const { total, visited, remaining } = getTopicStats();
+  const pct = Math.round((visited / total) * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressLabel').textContent = visited + ' / ' + total;
+  document.getElementById('settingsTopicProgress').textContent =
+    visited + ' of ' + total + ' topics completed. ' + remaining + ' remaining.';
+  updateResetBtnVisibility();
+}
+
+function updateResetBtnVisibility() {
+  const { visited } = getTopicStats();
+  document.getElementById('resetTopicsBtn').style.display = visited > 0 ? 'block' : 'none';
+}
+
+// ─── OPENROUTER ──────────────────────────────────────────────────────────────
+function getORKey() { return localStorage.getItem(OR_KEY_STORAGE) || ''; }
+function getGroqKey() { return localStorage.getItem(GROQ_KEY_STORAGE) || ''; }
+
 const MODELS = [
   'meta-llama/llama-3.3-8b-instruct:free',
   'meta-llama/llama-3.2-3b-instruct:free',
@@ -874,7 +1037,6 @@ const MODELS = [
   'qwen/qwen3-1.7b:free',
 ];
 
-// Call OpenRouter with automatic fallback through free models
 async function callAI(prompt, maxTokens) {
   if (!getORKey()) throw new Error('NO_KEY');
   let lastError = null;
@@ -882,48 +1044,26 @@ async function callAI(prompt, maxTokens) {
     try {
       const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
-        headers: {
-          'Authorization': 'Bearer ' + getORKey(),
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          model: model,
-          max_tokens: maxTokens,
-          messages: [{ role: 'user', content: prompt }]
-        })
+        headers: { 'Authorization': 'Bearer ' + getORKey(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] })
       });
       const data = await resp.json();
-
-      // Check for auth error — no point retrying other models
       if (resp.status === 401 || resp.status === 403) {
-        const msg = (data.error && data.error.message) || 'Invalid API key';
-        throw new Error('Auth failed: ' + msg + '. Check your OpenRouter key.');
+        throw new Error('Auth failed: ' + ((data.error && data.error.message) || 'Invalid API key'));
       }
-
       if (resp.ok && data.choices && data.choices[0] && data.choices[0].message) {
         return data.choices[0].message.content.trim();
       }
-
-      // 429 rate limit or provider error → try next model
       lastError = new Error((data.error && data.error.message) || ('HTTP ' + resp.status));
-      console.warn('Model', model, 'failed:', lastError.message, '— trying next...');
     } catch(e) {
-      // Re-throw auth errors immediately
       if (e.message && e.message.startsWith('Auth failed')) throw e;
       lastError = e;
-      console.warn('Model', model, 'threw:', e.message);
     }
   }
   throw lastError || new Error('All models failed');
 }
-const STORAGE_KEY = 'speakup_sessions';
-const GROQ_KEY_STORAGE = 'speakup_groq_key';
 
-function getGroqKey() {
-  return localStorage.getItem(GROQ_KEY_STORAGE) || '';
-}
-
-// ─── STATE ────────────────────────────────────────────────
+// ─── STATE ───────────────────────────────────────────────────────────────────
 let currentTopic = '';
 let isRecording = false;
 let mediaRecorder = null;
@@ -935,13 +1075,14 @@ let interimTranscript = '';
 let recognition = null;
 let waveBars = [];
 
-// ─── INIT ─────────────────────────────────────────────────
+// ─── INIT ─────────────────────────────────────────────────────────────────────
 window.onload = function() {
   buildWaveform();
   updateStats();
   updateStreak();
   loadGroqKeyUI();
   loadORKeyUI();
+  updateProgressUI();
 };
 
 function loadORKeyUI() {
@@ -951,7 +1092,7 @@ function loadORKeyUI() {
   if (key) {
     input.value = key;
     badge.className = 'groq-badge ok';
-    badge.textContent = '✓ OpenRouter key saved — Topics & AI Polish active';
+    badge.textContent = '✓ OpenRouter key saved — AI Polish active';
   }
 }
 
@@ -967,14 +1108,14 @@ function saveORKey() {
   if (!val) {
     localStorage.removeItem(OR_KEY_STORAGE);
     badge.className = 'groq-badge missing';
-    badge.textContent = '⚠ Key not set — topics & AI Polish off';
+    badge.textContent = '⚠ Key not set — AI Polish off';
     status.className = 'settings-status err';
     status.textContent = 'Key cleared';
     return;
   }
   localStorage.setItem(OR_KEY_STORAGE, val);
   badge.className = 'groq-badge ok';
-  badge.textContent = '✓ OpenRouter key saved — Topics & AI Polish active';
+  badge.textContent = '✓ OpenRouter key saved — AI Polish active';
   status.className = 'settings-status ok';
   status.textContent = 'Saved!';
   setTimeout(() => { status.textContent = ''; }, 2000);
@@ -1024,13 +1165,14 @@ function buildWaveform() {
   }
 }
 
-// ─── VIEWS ────────────────────────────────────────────────
+// ─── VIEWS ───────────────────────────────────────────────────────────────────
 function switchView(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('view-' + name).classList.add('active');
   document.getElementById('nav-' + name).classList.add('active');
   if (name === 'history') renderHistory();
+  if (name === 'settings') updateProgressUI();
 }
 
 function goToRecord() {
@@ -1053,56 +1195,53 @@ function cancelRecord() {
   switchView('home');
 }
 
-// ─── TOPIC GENERATION ─────────────────────────────────────
-async function generateTopic() {
+// ─── TOPIC GENERATION — picks from unvisited list ────────────────────────────
+function generateTopic() {
   const btn = document.getElementById('generateBtn');
   const display = document.getElementById('topicDisplay');
-  
-  btn.disabled = true;
-  btn.innerHTML = '<span class="spinner"></span>Generating...';
-  display.className = 'topic-text loading';
-  display.textContent = 'thinking of something interesting...';
+  const startBtn = document.getElementById('startRecordBtn');
 
-  try {
-    if (!getORKey()) {
-      display.className = 'topic-text topic-placeholder';
-      display.textContent = 'Add your OpenRouter key in ⚙️ Settings to generate topics.';
-      document.getElementById('startRecordBtn').disabled = true;
-      btn.disabled = false;
-      btn.innerHTML = '🎲 Generate Random Topic';
-      return;
-    }
-    const result = await callAI(
-      'Give me ONE interesting and thought-provoking topic for a 2-5 minute impromptu speech or conversation practice. The topic should be engaging, broadly relatable, and help someone practice communication. Just give the topic title/prompt, nothing else. No numbering, no explanation. Make it specific and interesting, not generic. Examples of style: "The last time you changed your mind about something important" or "A skill everyone should learn but rarely does" or "Your relationship with social media". Now give a new unique one.',
-      80
-    );
-    currentTopic = result.replace(/^["']|["']$/g, '');
-    display.className = 'topic-text';
-    display.textContent = currentTopic;
-    document.getElementById('startRecordBtn').disabled = false;
-  } catch (e) {
-    // Fallback topics if API fails
-    const fallbacks = [
-      "A habit that changed your life for the better",
-      "What would you do with one free year?",
-      "A lesson you learned the hard way",
-      "The most interesting person you've ever met",
-      "How you handle stress and pressure",
-      "Something you wish you had started earlier",
-      "A belief you hold that most people disagree with",
-      "What does success really mean to you?"
-    ];
-    currentTopic = fallbacks[Math.floor(Math.random() * fallbacks.length)];
-    display.className = 'topic-text';
-    display.textContent = currentTopic;
-    document.getElementById('startRecordBtn').disabled = false;
+  const unvisited = getUnvisitedTopics();
+
+  if (unvisited.length === 0) {
+    // All done!
+    display.className = 'topic-text topic-placeholder';
+    display.innerHTML = `<div class="all-done-msg">
+      <span class="done-icon">🎉</span>
+      <p>You've completed all <strong>70 topics!</strong><br>
+      Incredible dedication. Reset to start again.</p>
+    </div>`;
+    startBtn.disabled = true;
+    currentTopic = '';
+    updateProgressUI();
+    return;
   }
 
-  btn.disabled = false;
-  btn.innerHTML = '🎲 Generate Random Topic';
+  // Pick a random unvisited topic
+  const randomIdx = Math.floor(Math.random() * unvisited.length);
+  const chosen = unvisited[randomIdx];
+  currentTopic = chosen.topic;
+
+  // Mark it as visited immediately so it won't repeat
+  markTopicVisited(currentTopic);
+
+  // Update UI
+  display.className = 'topic-text';
+  display.textContent = currentTopic;
+  startBtn.disabled = false;
+
+  updateProgressUI();
+
+  // Show remaining hint
+  const { remaining } = getTopicStats();
+  if (remaining === 0) {
+    showToast('🎉 Last topic! Amazing!');
+  } else {
+    showToast(remaining + ' topics remaining');
+  }
 }
 
-// ─── RECORDING ────────────────────────────────────────────
+// ─── RECORDING ───────────────────────────────────────────────────────────────
 async function toggleRecording() {
   if (!isRecording) {
     await startRecording();
@@ -1114,34 +1253,24 @@ async function toggleRecording() {
 async function startRecording() {
   try {
     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    
-    // Detect best supported format (Samsung/Android needs mp4 or ogg, not webm)
     const mimeType = [
-      'audio/mp4',
-      'audio/webm;codecs=opus',
-      'audio/webm',
-      'audio/ogg;codecs=opus',
-      'audio/ogg',
+      'audio/mp4', 'audio/webm;codecs=opus', 'audio/webm',
+      'audio/ogg;codecs=opus', 'audio/ogg',
     ].find(m => MediaRecorder.isTypeSupported(m)) || '';
 
     mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
     window._recordingMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
     audioChunks = [];
-    
-    mediaRecorder.ondataavailable = e => {
-      if (e.data.size > 0) audioChunks.push(e.data);
-    };
-    
+
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
     mediaRecorder.start(100);
     isRecording = true;
 
-    // UI
     document.getElementById('recordBtn').classList.add('recording');
     document.getElementById('timerLabel').textContent = 'RECORDING';
     document.getElementById('timer').classList.add('recording');
     waveBars.forEach(b => b.classList.add('active'));
 
-    // Timer
     elapsedSeconds = 0;
     timerInterval = setInterval(() => {
       elapsedSeconds++;
@@ -1150,11 +1279,8 @@ async function startRecording() {
       document.getElementById('timer').textContent = m + ':' + String(s).padStart(2, '0');
     }, 1000);
 
-    // Speech recognition
     startSpeechRecognition();
-
     document.getElementById('finishBtn').disabled = false;
-
   } catch (e) {
     alert('Microphone access denied. Please allow microphone access and try again.');
   }
@@ -1163,90 +1289,61 @@ async function startRecording() {
 function stopRecording() {
   if (!isRecording) return;
   isRecording = false;
-
   if (mediaRecorder && mediaRecorder.state !== 'inactive') {
     mediaRecorder.stop();
     mediaRecorder.stream.getTracks().forEach(t => t.stop());
   }
-
-  if (recognition) {
-    try { recognition.stop(); } catch(e) {}
-    recognition = null;
-  }
-
+  if (recognition) { try { recognition.stop(); } catch(e) {} recognition = null; }
   clearInterval(timerInterval);
-
-  // UI
   document.getElementById('recordBtn').classList.remove('recording');
   document.getElementById('timer').classList.remove('recording');
   document.getElementById('timerLabel').textContent = 'STOPPED';
-  waveBars.forEach(b => {
-    b.classList.remove('active');
-    b.style.height = (8 + Math.random() * 12) + 'px';
-  });
+  waveBars.forEach(b => { b.classList.remove('active'); b.style.height = (8 + Math.random() * 12) + 'px'; });
 }
 
 function startSpeechRecognition() {
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   if (!SpeechRecognition) {
-    document.getElementById('transcriptContent').innerHTML = 
-      '<span class="tl-interim">Speech recognition not supported on this browser. Try Chrome on Android.</span>';
+    document.getElementById('transcriptContent').innerHTML =
+      '<span class="tl-interim">Speech recognition not supported. Try Chrome on Android.</span>';
     return;
   }
-
   recognition = new SpeechRecognition();
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.lang = 'en-US';
-
   recognition.onresult = (e) => {
     let interim = '';
     for (let i = e.resultIndex; i < e.results.length; i++) {
-      const transcript = e.results[i][0].transcript;
-      if (e.results[i].isFinal) {
-        finalTranscript += transcript + ' ';
-      } else {
-        interim += transcript;
-      }
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) finalTranscript += t + ' ';
+      else interim += t;
     }
     interimTranscript = interim;
     updateTranscriptDisplay();
   };
-
-  recognition.onend = () => {
-    if (isRecording) {
-      try { recognition.start(); } catch(e) {}
-    }
-  };
-
-  recognition.onerror = (e) => {
-    if (e.error === 'no-speech') return;
-  };
-
+  recognition.onend = () => { if (isRecording) { try { recognition.start(); } catch(e) {} } };
+  recognition.onerror = (e) => { if (e.error === 'no-speech') return; };
   try { recognition.start(); } catch(e) {}
 }
 
 function updateTranscriptDisplay() {
   const el = document.getElementById('transcriptContent');
-  el.innerHTML = finalTranscript + 
+  el.innerHTML = finalTranscript +
     (interimTranscript ? `<span class="tl-interim">${interimTranscript}</span>` : '') +
     '<span class="cursor"></span>';
 }
 
-// ─── FINISH SESSION ────────────────────────────────────────
+// ─── FINISH SESSION ───────────────────────────────────────────────────────────
 async function finishSession() {
   stopRecording();
-
   const finishBtn = document.getElementById('finishBtn');
   finishBtn.disabled = true;
   finishBtn.textContent = 'Saving...';
-
-  // Wait for MediaRecorder to fully flush all chunks
   await new Promise(r => setTimeout(r, 800));
 
   const mimeType = window._recordingMimeType || 'audio/webm';
   const audioBlob = new Blob(audioChunks, { type: mimeType });
-  console.log('Audio blob:', audioBlob.size, 'bytes, type:', mimeType);
 
   const tcEl = document.getElementById('transcriptContent');
   const groqKey = getGroqKey();
@@ -1259,7 +1356,6 @@ async function finishSession() {
       transcriptText = await groqTranscribe(audioBlob, groqKey, mimeType);
       tcEl.textContent = transcriptText;
     } catch(e) {
-      console.error('Groq transcription failed:', e);
       transcriptText = finalTranscript.trim() || '[Transcription failed: ' + e.message + ']';
       tcEl.textContent = transcriptText;
     }
@@ -1269,7 +1365,6 @@ async function finishSession() {
 
   finishBtn.textContent = 'Saving...';
 
-  // Always save regardless of transcription result
   try {
     const audioBase64 = await new Promise((resolve, reject) => {
       const reader = new FileReader();
@@ -1277,27 +1372,18 @@ async function finishSession() {
       reader.onerror = reject;
       reader.readAsDataURL(audioBlob);
     });
-
     const session = {
-      id: Date.now(),
-      date: new Date().toISOString(),
-      topic: currentTopic,
-      duration: elapsedSeconds,
-      transcript: transcriptText || '[No transcript available]',
+      id: Date.now(), date: new Date().toISOString(), topic: currentTopic,
+      duration: elapsedSeconds, transcript: transcriptText || '[No transcript available]',
       audio: audioBase64
     };
     saveSession(session);
     showToast('✓ Session saved!');
     setTimeout(() => switchView('home'), 600);
   } catch(e) {
-    console.error('Save failed:', e);
-    // Save without audio if FileReader fails
     const session = {
-      id: Date.now(),
-      date: new Date().toISOString(),
-      topic: currentTopic,
-      duration: elapsedSeconds,
-      transcript: transcriptText || '[No transcript available]',
+      id: Date.now(), date: new Date().toISOString(), topic: currentTopic,
+      duration: elapsedSeconds, transcript: transcriptText || '[No transcript available]',
       audio: null
     };
     saveSession(session);
@@ -1310,43 +1396,24 @@ async function finishSession() {
 }
 
 async function groqTranscribe(audioBlob, key, mimeType) {
-  // Pick correct file extension for Groq based on mime type
-  const extMap = {
-    'audio/mp4': 'm4a',
-    'audio/webm': 'webm',
-    'audio/ogg': 'ogg',
-    'audio/mpeg': 'mp3',
-  };
+  const extMap = { 'audio/mp4': 'm4a', 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mpeg': 'mp3' };
   const baseMime = (mimeType || 'audio/webm').split(';')[0];
   const ext = extMap[baseMime] || 'webm';
-  const filename = 'recording.' + ext;
-
-  console.log('Sending to Groq:', filename, audioBlob.size, 'bytes');
-
   const formData = new FormData();
-  formData.append('file', audioBlob, filename);
+  formData.append('file', audioBlob, 'recording.' + ext);
   formData.append('model', 'whisper-large-v3-turbo');
   formData.append('response_format', 'json');
   formData.append('language', 'en');
-
-  // 30 second timeout
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), 30000);
-
   try {
     const resp = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
       method: 'POST',
       headers: { 'Authorization': 'Bearer ' + key },
-      body: formData,
-      signal: controller.signal
+      body: formData, signal: controller.signal
     });
     clearTimeout(timeout);
-
-    if (!resp.ok) {
-      const err = await resp.text();
-      throw new Error('Groq HTTP ' + resp.status + ': ' + err);
-    }
-
+    if (!resp.ok) { const err = await resp.text(); throw new Error('Groq HTTP ' + resp.status + ': ' + err); }
     const data = await resp.json();
     return (data.text || '').trim();
   } catch(e) {
@@ -1356,11 +1423,9 @@ async function groqTranscribe(audioBlob, key, mimeType) {
   }
 }
 
-// ─── STORAGE ──────────────────────────────────────────────
+// ─── STORAGE ─────────────────────────────────────────────────────────────────
 function getSessions() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
-  } catch(e) { return []; }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
 }
 
 function saveSession(session) {
@@ -1369,13 +1434,9 @@ function saveSession(session) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
   } catch(e) {
-    // Storage full - remove oldest sessions
     while (sessions.length > 1) {
       sessions.pop();
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-        break;
-      } catch(e2) {}
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); break; } catch(e2) {}
     }
   }
   updateStats();
@@ -1391,7 +1452,7 @@ function deleteSession(id) {
   renderHistory();
 }
 
-// ─── STATS ────────────────────────────────────────────────
+// ─── STATS ────────────────────────────────────────────────────────────────────
 function updateStats() {
   const sessions = getSessions();
   document.getElementById('stat-sessions').textContent = sessions.length;
@@ -1406,53 +1467,38 @@ function updateStreak() {
     document.getElementById('stat-streak').textContent = '0';
     return;
   }
-
   const dates = [...new Set(sessions.map(s => s.date.split('T')[0]))].sort().reverse();
-  const today = new Date().toISOString().split('T')[0];
-  
   let streak = 0;
   let checkDate = new Date();
-  
   for (let i = 0; i < 365; i++) {
     const d = checkDate.toISOString().split('T')[0];
-    if (dates.includes(d)) {
-      streak++;
-      checkDate.setDate(checkDate.getDate() - 1);
-    } else if (i === 0) {
-      checkDate.setDate(checkDate.getDate() - 1);
-    } else {
-      break;
-    }
+    if (dates.includes(d)) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
+    else if (i === 0) { checkDate.setDate(checkDate.getDate() - 1); }
+    else { break; }
   }
-
   document.getElementById('stat-streak').textContent = streak;
-  
-  // Day number since first session
   const firstDate = new Date(sessions[sessions.length - 1].date);
   const diff = Math.floor((Date.now() - firstDate) / 86400000) + 1;
   document.getElementById('streakDay').textContent = diff;
 }
 
-// ─── HISTORY ──────────────────────────────────────────────
+// ─── HISTORY ─────────────────────────────────────────────────────────────────
+const aiPolishCache = {};
+const transcriptMap = {};
+
 function renderHistory() {
   const sessions = getSessions();
   const list = document.getElementById('historyList');
-  
   if (!sessions.length) {
-    list.innerHTML = `<div class="history-empty">
-      <span class="big">📼</span>
-      No sessions yet.<br>Start speaking today!
-    </div>`;
+    list.innerHTML = `<div class="history-empty"><span class="big">📼</span>No sessions yet.<br>Start speaking today!</div>`;
     return;
   }
-
   list.innerHTML = '';
   sessions.forEach(session => {
     const date = new Date(session.date);
     const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
     const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
     const dur = formatDuration(session.duration);
-
     const card = document.createElement('div');
     card.className = 'session-card';
     card.innerHTML = `
@@ -1464,21 +1510,14 @@ function renderHistory() {
         <div class="session-duration">${dur}</div>
       </div>
       <div class="session-body" id="card-${session.id}">
-        ${session.audio ? `
-        <div class="session-audio">
-          <audio controls preload="none">
-            <source src="${session.audio}" type="audio/webm">
-          </audio>
-        </div>` : ''}
+        ${session.audio ? `<div class="session-audio"><audio controls preload="none"><source src="${session.audio}" type="audio/webm"></audio></div>` : ''}
         <div class="session-transcript">${escapeHtml(session.transcript)}</div>
-
         <div class="session-actions">
           <button class="ai-polish-btn" id="ai-btn-${session.id}" onclick="toggleAiPolish(${session.id})">
             <span class="ai-icon">✨</span> AI Polish
           </button>
           <button class="session-delete" onclick="deleteSession(${session.id})">✕ Delete</button>
         </div>
-
         <div class="ai-polish-section" id="ai-polish-${session.id}">
           <div class="ai-polish-header">
             <span class="ai-polish-header-label">✨ AI POLISHED VERSION</span>
@@ -1494,82 +1533,50 @@ function renderHistory() {
 }
 
 function toggleCard(id) {
-  const body = document.getElementById('card-' + id);
-  body.classList.toggle('open');
+  document.getElementById('card-' + id).classList.toggle('open');
 }
 
 function formatDuration(s) {
   if (!s) return '0:00';
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return m + ':' + String(sec).padStart(2, '0');
+  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
 }
 
 function escapeHtml(str) {
   return String(str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 }
-
-
-// ─── AI POLISH ────────────────────────────────────────────
-const aiPolishCache = {};
-const transcriptMap = {};  // id -> transcript string
 
 async function toggleAiPolish(id) {
   const section = document.getElementById('ai-polish-' + id);
   const contentEl = document.getElementById('ai-polish-content-' + id);
   const btn = document.getElementById('ai-btn-' + id);
-
-  if (section.classList.contains('open')) {
-    section.classList.remove('open');
-    return;
-  }
-
+  if (section.classList.contains('open')) { section.classList.remove('open'); return; }
   section.classList.add('open');
-
-  if (aiPolishCache[id]) {
-    contentEl.innerHTML = aiPolishCache[id];
-    return;
-  }
-
+  if (aiPolishCache[id]) { contentEl.innerHTML = aiPolishCache[id]; return; }
   if (!getORKey()) {
     contentEl.innerHTML = '<span style="color:var(--muted);font-size:11px">Add your OpenRouter key in ⚙️ Settings to use AI Polish.</span>';
     return;
   }
-
-  // Get transcript from our map (populated during renderHistory)
   const transcript = transcriptMap[id] || '';
-
   if (!transcript || transcript === '[No transcript available]') {
     contentEl.innerHTML = '<span style="color:var(--muted);font-style:italic">No transcript to polish.</span>';
     return;
   }
-
   btn.classList.add('loading');
   contentEl.innerHTML = '<div class="ai-polish-loading"><span class="spinner"></span>Polishing your speech...</div>';
-
   try {
     const polished = await callAI(
-      'You are a communication coach. Below is a raw speech transcript from voice-to-text. It may have grammar errors, missing transitions, filler words, and run-on sentences.\n\nYour task:\n1. Fix ALL grammar and spelling errors\n2. Add smooth transitions between ideas where missing (e.g. "Furthermore", "Building on that", "To illustrate", "On the other hand")\n3. Keep the EXACT same meaning and personal voice — do NOT add new content\n4. Keep it natural and conversational, not overly formal\n5. Return ONLY the polished text, nothing else\n\nRaw transcript:\n' + transcript,
+      'You are a communication coach. Below is a raw speech transcript from voice-to-text. Fix ALL grammar and spelling errors. Add smooth transitions between ideas. Keep the EXACT same meaning and personal voice. Return ONLY the polished text.\n\nRaw transcript:\n' + transcript,
       700
     );
-    const paragraphs = polished.split(/\n\n+/).map(function(p) {
-      return '<p style="margin-bottom:10px">' + p.replace(/\n/g, ' ') + '</p>';
-    }).join('');
+    const paragraphs = polished.split(/\n\n+/).map(p => '<p style="margin-bottom:10px">' + p.replace(/\n/g, ' ') + '</p>').join('');
     contentEl.innerHTML = paragraphs;
     aiPolishCache[id] = paragraphs;
   } catch(e) {
-    console.error('AI Polish error:', e);
     let errMsg = e.message || 'Unknown error';
-    if (errMsg === 'NO_KEY' || errMsg.includes('Auth failed') || errMsg.includes('user not found') || errMsg.includes('401')) {
-      errMsg = 'Add your OpenRouter key in ⚙️ Settings first.';
-    }
+    if (errMsg === 'NO_KEY' || errMsg.includes('Auth failed')) errMsg = 'Add your OpenRouter key in ⚙️ Settings first.';
     contentEl.innerHTML = '<span style="color:var(--danger);font-size:11px">' + errMsg + '</span>';
   }
-
   btn.classList.remove('loading');
 }
 
@@ -1577,7 +1584,6 @@ function closeAiPolish(id) {
   document.getElementById('ai-polish-' + id).classList.remove('open');
 }
 
-// ─── TOAST ────────────────────────────────────────────────
 function showToast(msg) {
   const toast = document.getElementById('toast');
   toast.textContent = msg;
