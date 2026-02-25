@@ -18,727 +18,138 @@
     --danger: #ff4f4f;
     --radius: 16px;
   }
-
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Syne', sans-serif;
-    min-height: 100dvh;
-    overflow-x: hidden;
-    padding-bottom: env(safe-area-inset-bottom);
-  }
-
-  body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 1000;
-    opacity: 0.5;
-  }
-
-  header {
-    padding: 48px 24px 24px;
-    position: relative;
-  }
-  .logo-line {
-    display: flex;
-    align-items: baseline;
-    gap: 8px;
-  }
-  .logo {
-    font-size: 28px;
-    font-weight: 800;
-    letter-spacing: -1px;
-    color: var(--accent);
-  }
-  .logo-sub {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 2px;
-  }
-  .day-badge {
-    margin-top: 6px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    letter-spacing: 1px;
-  }
-  .day-badge span {
-    color: var(--accent);
-    font-weight: 600;
-  }
-
+  body { background: var(--bg); color: var(--text); font-family: 'Syne', sans-serif; min-height: 100dvh; overflow-x: hidden; padding-bottom: env(safe-area-inset-bottom); }
+  body::before { content: ''; position: fixed; inset: 0; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E"); pointer-events: none; z-index: 1000; opacity: 0.5; }
+  header { padding: 48px 24px 24px; }
+  .logo-line { display: flex; align-items: baseline; gap: 8px; }
+  .logo { font-size: 28px; font-weight: 800; letter-spacing: -1px; color: var(--accent); }
+  .logo-sub { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 2px; }
+  .day-badge { margin-top: 6px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); letter-spacing: 1px; }
+  .day-badge span { color: var(--accent); font-weight: 600; }
   .view { display: none; padding: 0 24px; }
   .view.active { display: block; }
-
-  .topic-area {
-    background: var(--surface);
-    border: 1px solid var(--surface2);
-    border-radius: var(--radius);
-    padding: 28px 24px;
-    min-height: 140px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    position: relative;
-    overflow: hidden;
-    margin-bottom: 20px;
-  }
-  .topic-area::before {
-    content: '';
-    position: absolute;
-    top: -40px; right: -40px;
-    width: 140px; height: 140px;
-    background: radial-gradient(circle, rgba(127,255,110,0.08) 0%, transparent 70%);
-    border-radius: 50%;
-  }
-  .topic-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    margin-bottom: 12px;
-    text-transform: uppercase;
-  }
-  .topic-text {
-    font-size: 22px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--text);
-    transition: opacity 0.3s;
-  }
-  .topic-text.loading {
-    opacity: 0.4;
-    font-style: italic;
-    font-size: 16px;
-    font-family: 'DM Mono', monospace;
-  }
-  .topic-placeholder {
-    font-size: 16px;
-    color: var(--muted);
-    font-weight: 400;
-    line-height: 1.5;
-  }
-
-  /* Topic progress badge */
-  .topic-progress {
-    margin-top: 12px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .topic-progress-bar {
-    flex: 1;
-    height: 3px;
-    background: var(--surface2);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .topic-progress-fill {
-    height: 100%;
-    background: var(--accent);
-    border-radius: 2px;
-    transition: width 0.4s ease;
-  }
-  .topic-progress-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
-  .btn {
-    width: 100%;
-    padding: 18px 24px;
-    border-radius: var(--radius);
-    border: none;
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s;
-    letter-spacing: 0.3px;
-    position: relative;
-    overflow: hidden;
-  }
+  .topic-area { background: var(--surface); border: 1px solid var(--surface2); border-radius: var(--radius); padding: 28px 24px; min-height: 140px; display: flex; flex-direction: column; justify-content: center; position: relative; overflow: hidden; margin-bottom: 20px; }
+  .topic-area::before { content: ''; position: absolute; top: -40px; right: -40px; width: 140px; height: 140px; background: radial-gradient(circle, rgba(127,255,110,0.08) 0%, transparent 70%); border-radius: 50%; }
+  .topic-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--muted); margin-bottom: 12px; text-transform: uppercase; }
+  .topic-text { font-size: 22px; font-weight: 600; line-height: 1.3; color: var(--text); }
+  .topic-placeholder { font-size: 16px; color: var(--muted); font-weight: 400; line-height: 1.5; }
+  .topic-progress { margin-top: 12px; display: flex; align-items: center; gap: 8px; }
+  .topic-progress-bar { flex: 1; height: 3px; background: var(--surface2); border-radius: 2px; overflow: hidden; }
+  .topic-progress-fill { height: 100%; background: var(--accent); border-radius: 2px; transition: width 0.4s ease; }
+  .topic-progress-label { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); white-space: nowrap; }
+  .btn { width: 100%; padding: 18px 24px; border-radius: var(--radius); border: none; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: transform 0.15s, opacity 0.15s, box-shadow 0.15s; letter-spacing: 0.3px; position: relative; overflow: hidden; }
   .btn:active { transform: scale(0.97); }
-  .btn-primary {
-    background: var(--accent);
-    color: #0a0a0f;
-  }
+  .btn-primary { background: var(--accent); color: #0a0a0f; }
   .btn-primary:hover { box-shadow: 0 0 30px rgba(127,255,110,0.3); }
-  .btn-secondary {
-    background: var(--surface);
-    color: var(--text);
-    border: 1px solid var(--surface2);
-  }
-  .btn-danger {
-    background: var(--danger);
-    color: #fff;
-  }
-  .btn-ghost {
-    background: transparent;
-    color: var(--muted);
-    border: 1px dashed var(--surface2);
-    font-weight: 400;
-    font-size: 14px;
-  }
-  .btn-warning {
-    background: transparent;
-    color: var(--accent2);
-    border: 1px solid rgba(255,110,180,0.3);
-    font-weight: 400;
-    font-size: 13px;
-    padding: 12px 24px;
-  }
-  .btn:disabled {
-    opacity: 0.4;
-    cursor: not-allowed;
-  }
+  .btn-secondary { background: var(--surface); color: var(--text); border: 1px solid var(--surface2); }
+  .btn-danger { background: var(--danger); color: #fff; }
+  .btn-ghost { background: transparent; color: var(--muted); border: 1px dashed var(--surface2); font-weight: 400; font-size: 14px; }
+  .btn-warning { background: transparent; color: var(--accent2); border: 1px solid rgba(255,110,180,0.3); font-weight: 400; font-size: 13px; padding: 12px 24px; }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .btn + .btn { margin-top: 10px; }
-
-  .record-topic {
-    background: var(--surface);
-    border-left: 3px solid var(--accent);
-    border-radius: 8px;
-    padding: 16px;
-    margin-bottom: 24px;
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.4;
-    color: var(--text);
-  }
-  .record-topic small {
-    display: block;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    margin-bottom: 6px;
-    font-weight: 400;
-  }
-
-  .waveform-container {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 20px;
-    height: 100px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    overflow: hidden;
-  }
-  .wave-bar {
-    width: 4px;
-    background: var(--surface2);
-    border-radius: 2px;
-    height: 8px;
-    transition: height 0.1s ease;
-  }
-  .wave-bar.active {
-    background: var(--accent);
-    animation: wavePulse 0.5s ease-in-out infinite alternate;
-  }
-  @keyframes wavePulse {
-    from { height: 8px; }
-    to { height: 60px; }
-  }
-
-  .timer {
-    text-align: center;
-    font-family: 'DM Mono', monospace;
-    font-size: 42px;
-    font-weight: 300;
-    letter-spacing: 4px;
-    color: var(--text);
-    margin-bottom: 8px;
-  }
+  /* DRAFT RECOVERY BANNER */
+  .draft-banner { display: none; background: linear-gradient(135deg, rgba(255,110,180,0.12), rgba(127,255,110,0.08)); border: 1px solid rgba(255,110,180,0.35); border-radius: var(--radius); padding: 16px 18px; margin-bottom: 18px; }
+  .draft-banner.visible { display: block; }
+  .draft-banner-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent2); margin-bottom: 6px; }
+  .draft-banner-body { font-size: 13px; color: var(--text); line-height: 1.5; margin-bottom: 12px; }
+  .draft-banner-topic { font-weight: 700; color: var(--accent); }
+  .draft-banner-actions { display: flex; gap: 8px; }
+  .draft-action-btn { flex: 1; padding: 10px 12px; border-radius: 10px; border: none; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
+  .draft-action-btn:active { opacity: 0.75; }
+  .draft-btn-save { background: var(--accent); color: #0a0a0f; }
+  .draft-btn-discard { background: var(--surface2); color: var(--muted); }
+  .record-topic { background: var(--surface); border-left: 3px solid var(--accent); border-radius: 8px; padding: 16px; margin-bottom: 24px; font-size: 15px; font-weight: 600; line-height: 1.4; color: var(--text); }
+  .record-topic small { display: block; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-bottom: 6px; font-weight: 400; }
+  .waveform-container { background: var(--surface); border-radius: var(--radius); padding: 20px; margin-bottom: 20px; height: 100px; display: flex; align-items: center; justify-content: center; gap: 3px; overflow: hidden; }
+  .wave-bar { width: 4px; background: var(--surface2); border-radius: 2px; height: 8px; transition: height 0.1s ease; }
+  .wave-bar.active { background: var(--accent); animation: wavePulse 0.5s ease-in-out infinite alternate; }
+  @keyframes wavePulse { from { height: 8px; } to { height: 60px; } }
+  .timer { text-align: center; font-family: 'DM Mono', monospace; font-size: 42px; font-weight: 300; letter-spacing: 4px; color: var(--text); margin-bottom: 8px; }
   .timer.recording { color: var(--accent); }
-  .timer-label {
-    text-align: center;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    margin-bottom: 24px;
-  }
-
-  .record-btn-wrap {
-    display: flex;
-    justify-content: center;
-    margin-bottom: 20px;
-  }
-  .record-btn {
-    width: 84px;
-    height: 84px;
-    border-radius: 50%;
-    border: none;
-    cursor: pointer;
-    background: var(--accent);
-    position: relative;
-    transition: transform 0.2s, box-shadow 0.2s;
-    box-shadow: 0 0 0 0 rgba(127,255,110,0.4);
-  }
-  .record-btn::after {
-    content: '';
-    position: absolute;
-    inset: 28px;
-    background: #0a0a0f;
-    border-radius: 4px;
-    transition: inset 0.2s;
-  }
-  .record-btn.recording {
-    background: var(--danger);
-    animation: pulse 1.5s infinite;
-    box-shadow: 0 0 0 8px rgba(255,79,79,0.2);
-  }
-  .record-btn.recording::after {
-    inset: 28px;
-    border-radius: 4px;
-    background: #fff;
-  }
-  .record-btn:not(.recording)::after {
-    inset: 32px;
-    border-radius: 50%;
-    background: #0a0a0f;
-  }
-  @keyframes pulse {
-    0%, 100% { box-shadow: 0 0 0 8px rgba(255,79,79,0.2); }
-    50% { box-shadow: 0 0 0 16px rgba(255,79,79,0.05); }
-  }
-
-  .transcript-live {
-    background: var(--surface);
-    border-radius: var(--radius);
-    padding: 16px;
-    min-height: 80px;
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    line-height: 1.7;
-    color: var(--text);
-    margin-bottom: 20px;
-    position: relative;
-  }
-  .transcript-live .tl-label {
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    display: block;
-    margin-bottom: 8px;
-  }
-  .transcript-live .tl-content { color: var(--text); }
-  .transcript-live .tl-interim { color: var(--muted); font-style: italic; }
-  .transcript-live .cursor {
-    display: inline-block;
-    width: 2px; height: 14px;
-    background: var(--accent);
-    margin-left: 2px;
-    vertical-align: middle;
-    animation: blink 1s infinite;
-  }
+  .timer-label { text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--muted); margin-bottom: 24px; }
+  .record-btn-wrap { display: flex; justify-content: center; margin-bottom: 20px; }
+  .record-btn { width: 84px; height: 84px; border-radius: 50%; border: none; cursor: pointer; background: var(--accent); position: relative; transition: transform 0.2s, box-shadow 0.2s; box-shadow: 0 0 0 0 rgba(127,255,110,0.4); }
+  .record-btn::after { content: ''; position: absolute; inset: 28px; background: #0a0a0f; border-radius: 4px; transition: inset 0.2s; }
+  .record-btn.recording { background: var(--danger); animation: pulse 1.5s infinite; box-shadow: 0 0 0 8px rgba(255,79,79,0.2); }
+  .record-btn.recording::after { inset: 28px; border-radius: 4px; background: #fff; }
+  .record-btn:not(.recording)::after { inset: 32px; border-radius: 50%; background: #0a0a0f; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 8px rgba(255,79,79,0.2); } 50% { box-shadow: 0 0 0 16px rgba(255,79,79,0.05); } }
+  .transcript-live { background: var(--surface); border-radius: var(--radius); padding: 16px; min-height: 80px; font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.7; color: var(--text); margin-bottom: 20px; }
+  .transcript-live .tl-label { font-size: 10px; letter-spacing: 2px; color: var(--muted); display: block; margin-bottom: 8px; }
+  .tl-interim { color: var(--muted); font-style: italic; }
+  .cursor { display: inline-block; width: 2px; height: 14px; background: var(--accent); margin-left: 2px; vertical-align: middle; animation: blink 1s infinite; }
   @keyframes blink { 50% { opacity: 0; } }
-
-  .history-empty {
-    text-align: center;
-    padding: 60px 24px;
-    color: var(--muted);
-    font-family: 'DM Mono', monospace;
-    font-size: 13px;
-    line-height: 1.8;
-  }
-  .history-empty .big {
-    font-size: 48px;
-    display: block;
-    margin-bottom: 12px;
-    opacity: 0.3;
-  }
-
-  .session-card {
-    background: var(--surface);
-    border-radius: var(--radius);
-    border: 1px solid var(--surface2);
-    margin-bottom: 14px;
-    overflow: hidden;
-    transition: border-color 0.2s;
-  }
-  .session-card:active { border-color: var(--accent); }
-  .session-header {
-    padding: 16px;
-    cursor: pointer;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-  }
+  .autosave-indicator { text-align: center; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--muted); margin-bottom: 10px; height: 16px; transition: color 0.3s; }
+  .autosave-indicator.saved { color: var(--accent); }
+  .history-empty { text-align: center; padding: 60px 24px; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 13px; line-height: 1.8; }
+  .history-empty .big { font-size: 48px; display: block; margin-bottom: 12px; opacity: 0.3; }
+  .session-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--surface2); margin-bottom: 14px; overflow: hidden; }
+  .session-header { padding: 16px; cursor: pointer; display: flex; justify-content: space-between; align-items: flex-start; }
   .session-meta { flex: 1; }
-  .session-date {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    margin-bottom: 4px;
-  }
-  .session-topic-title {
-    font-size: 15px;
-    font-weight: 600;
-    line-height: 1.3;
-    color: var(--text);
-  }
-  .session-duration {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    white-space: nowrap;
-    margin-left: 12px;
-    padding-top: 2px;
-  }
-  .session-body {
-    display: none;
-    padding: 0 16px 16px;
-    border-top: 1px solid var(--surface2);
-  }
+  .session-date { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-bottom: 4px; }
+  .session-topic-title { font-size: 15px; font-weight: 600; line-height: 1.3; color: var(--text); }
+  .session-duration { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); white-space: nowrap; margin-left: 12px; padding-top: 2px; }
+  .session-body { display: none; padding: 0 16px 16px; border-top: 1px solid var(--surface2); }
   .session-body.open { display: block; }
-  .session-transcript {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    line-height: 1.8;
-    color: var(--muted);
-    margin-top: 12px;
-    max-height: 200px;
-    overflow-y: auto;
-    background: var(--bg);
-    border-radius: 8px;
-    padding: 12px;
-  }
+  .session-transcript { font-family: 'DM Mono', monospace; font-size: 12px; line-height: 1.8; color: var(--muted); margin-top: 12px; max-height: 200px; overflow-y: auto; background: var(--bg); border-radius: 8px; padding: 12px; }
   .session-audio { margin-top: 12px; width: 100%; }
-  .session-audio audio {
-    width: 100%;
-    border-radius: 8px;
-    outline: none;
-    filter: invert(1) hue-rotate(90deg);
-  }
-  .session-delete {
-    margin-top: 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--danger);
-    background: none;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    letter-spacing: 1px;
-    opacity: 0.6;
-  }
+  .session-audio audio { width: 100%; border-radius: 8px; outline: none; filter: invert(1) hue-rotate(90deg); }
+  .audio-loading { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); margin-top: 12px; display: flex; align-items: center; gap: 6px; }
+  .session-delete { margin-top: 12px; font-family: 'DM Mono', monospace; font-size: 11px; color: var(--danger); background: none; border: none; cursor: pointer; padding: 0; letter-spacing: 1px; opacity: 0.6; }
   .session-delete:active { opacity: 1; }
-
-  nav {
-    position: fixed;
-    bottom: 0;
-    left: 0; right: 0;
-    background: var(--surface);
-    border-top: 1px solid var(--surface2);
-    display: flex;
-    padding: 12px 0;
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
-    z-index: 100;
-  }
-  .nav-btn {
-    flex: 1;
-    background: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 4px;
-    padding: 4px;
-    transition: color 0.2s;
-  }
+  nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--surface2); display: flex; padding: 12px 0; padding-bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 100; }
+  .nav-btn { flex: 1; background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 4px; }
   .nav-btn .nav-icon { font-size: 22px; line-height: 1; }
-  .nav-btn .nav-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 9px;
-    letter-spacing: 2px;
-    color: var(--muted);
-    transition: color 0.2s;
-  }
+  .nav-btn .nav-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--muted); transition: color 0.2s; }
   .nav-btn.active .nav-label { color: var(--accent); }
-
   .spacer { height: 90px; }
-
-  .stats-row {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .stat-box {
-    flex: 1;
-    background: var(--surface);
-    border-radius: 12px;
-    padding: 14px;
-    text-align: center;
-  }
-  .stat-num {
-    font-size: 26px;
-    font-weight: 800;
-    color: var(--accent);
-    display: block;
-  }
-  .stat-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 1px;
-    color: var(--muted);
-    display: block;
-    margin-top: 2px;
-  }
-
-  .section-title {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 3px;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 14px;
-  }
-
-  .save-toast {
-    position: fixed;
-    top: 20px; left: 50%;
-    transform: translateX(-50%) translateY(-80px);
-    background: var(--accent);
-    color: #0a0a0f;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    font-weight: 600;
-    padding: 10px 20px;
-    border-radius: 100px;
-    letter-spacing: 1px;
-    z-index: 999;
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-  }
+  .stats-row { display: flex; gap: 10px; margin-bottom: 20px; }
+  .stat-box { flex: 1; background: var(--surface); border-radius: 12px; padding: 14px; text-align: center; }
+  .stat-num { font-size: 26px; font-weight: 800; color: var(--accent); display: block; }
+  .stat-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--muted); display: block; margin-top: 2px; }
+  .section-title { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; color: var(--muted); text-transform: uppercase; margin-bottom: 14px; }
+  .save-toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px); background: var(--accent); color: #0a0a0f; font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 600; padding: 10px 20px; border-radius: 100px; letter-spacing: 1px; z-index: 999; transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
   .save-toast.show { transform: translateX(-50%) translateY(0); }
-
-  .spinner {
-    display: inline-block;
-    width: 14px; height: 14px;
-    border: 2px solid rgba(10,10,15,0.3);
-    border-top-color: #0a0a0f;
-    border-radius: 50%;
-    animation: spin 0.7s linear infinite;
-    vertical-align: middle;
-    margin-right: 6px;
-  }
+  .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(10,10,15,0.3); border-top-color: #0a0a0f; border-radius: 50%; animation: spin 0.7s linear infinite; vertical-align: middle; margin-right: 6px; }
+  .spinner-light { border-color: rgba(127,255,110,0.2); border-top-color: var(--accent); }
   @keyframes spin { to { transform: rotate(360deg); } }
-
-  .wave-bar.active:nth-child(1) { animation-delay: 0s; animation-duration: 0.4s; }
-  .wave-bar.active:nth-child(2) { animation-delay: 0.05s; animation-duration: 0.5s; }
-  .wave-bar.active:nth-child(3) { animation-delay: 0.1s; animation-duration: 0.3s; }
-  .wave-bar.active:nth-child(4) { animation-delay: 0.15s; animation-duration: 0.6s; }
-  .wave-bar.active:nth-child(5) { animation-delay: 0.05s; animation-duration: 0.45s; }
-  .wave-bar.active:nth-child(6) { animation-delay: 0.2s; animation-duration: 0.35s; }
-  .wave-bar.active:nth-child(7) { animation-delay: 0.1s; animation-duration: 0.55s; }
-  .wave-bar.active:nth-child(8) { animation-delay: 0s; animation-duration: 0.4s; }
-  .wave-bar.active:nth-child(9) { animation-delay: 0.15s; animation-duration: 0.5s; }
-  .wave-bar.active:nth-child(10) { animation-delay: 0.08s; animation-duration: 0.38s; }
-  .wave-bar.active:nth-child(11) { animation-delay: 0.22s; animation-duration: 0.48s; }
-  .wave-bar.active:nth-child(12) { animation-delay: 0.06s; animation-duration: 0.42s; }
-  .wave-bar.active:nth-child(13) { animation-delay: 0.18s; animation-duration: 0.52s; }
-  .wave-bar.active:nth-child(14) { animation-delay: 0.12s; animation-duration: 0.36s; }
-  .wave-bar.active:nth-child(15) { animation-delay: 0.02s; animation-duration: 0.58s; }
-  .wave-bar.active:nth-child(16) { animation-delay: 0.24s; animation-duration: 0.44s; }
-
-  .session-actions {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 14px;
-  }
-  .ai-polish-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: linear-gradient(135deg, rgba(127,255,110,0.1), rgba(110,180,255,0.08));
-    border: 1px solid rgba(127,255,110,0.25);
-    border-radius: 100px;
-    padding: 8px 16px;
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    letter-spacing: 1px;
-    color: var(--accent);
-    cursor: pointer;
-    transition: background 0.2s, transform 0.15s;
-  }
-  .ai-polish-btn:active { transform: scale(0.96); background: rgba(127,255,110,0.18); }
+  .wave-bar.active:nth-child(1){animation-delay:0s;animation-duration:.4s}.wave-bar.active:nth-child(2){animation-delay:.05s;animation-duration:.5s}.wave-bar.active:nth-child(3){animation-delay:.1s;animation-duration:.3s}.wave-bar.active:nth-child(4){animation-delay:.15s;animation-duration:.6s}.wave-bar.active:nth-child(5){animation-delay:.05s;animation-duration:.45s}.wave-bar.active:nth-child(6){animation-delay:.2s;animation-duration:.35s}.wave-bar.active:nth-child(7){animation-delay:.1s;animation-duration:.55s}.wave-bar.active:nth-child(8){animation-delay:0s;animation-duration:.4s}.wave-bar.active:nth-child(9){animation-delay:.15s;animation-duration:.5s}.wave-bar.active:nth-child(10){animation-delay:.08s;animation-duration:.38s}.wave-bar.active:nth-child(11){animation-delay:.22s;animation-duration:.48s}.wave-bar.active:nth-child(12){animation-delay:.06s;animation-duration:.42s}.wave-bar.active:nth-child(13){animation-delay:.18s;animation-duration:.52s}.wave-bar.active:nth-child(14){animation-delay:.12s;animation-duration:.36s}.wave-bar.active:nth-child(15){animation-delay:.02s;animation-duration:.58s}.wave-bar.active:nth-child(16){animation-delay:.24s;animation-duration:.44s}
+  .session-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; }
+  .ai-polish-btn { display: inline-flex; align-items: center; gap: 6px; background: linear-gradient(135deg, rgba(127,255,110,0.1), rgba(110,180,255,0.08)); border: 1px solid rgba(127,255,110,0.25); border-radius: 100px; padding: 8px 16px; font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; color: var(--accent); cursor: pointer; transition: background 0.2s, transform 0.15s; }
+  .ai-polish-btn:active { transform: scale(0.96); }
   .ai-polish-btn.loading { opacity: 0.6; pointer-events: none; }
   .ai-icon { font-size: 14px; }
-  .ai-polish-section {
-    display: none;
-    margin-top: 14px;
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid rgba(127,255,110,0.2);
-    animation: slideDown 0.25s ease;
-  }
-  @keyframes slideDown {
-    from { opacity: 0; transform: translateY(-8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
+  .ai-polish-section { display: none; margin-top: 14px; border-radius: 12px; overflow: hidden; border: 1px solid rgba(127,255,110,0.2); animation: slideDown 0.25s ease; }
+  @keyframes slideDown { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
   .ai-polish-section.open { display: block; }
-  .ai-polish-header {
-    background: linear-gradient(135deg, rgba(127,255,110,0.1), rgba(110,180,255,0.07));
-    padding: 10px 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  .ai-polish-header-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    flex: 1;
-  }
-  .ai-polish-close {
-    background: none;
-    border: none;
-    color: var(--muted);
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0;
-    line-height: 1;
-  }
-  .ai-polish-content {
-    background: var(--bg);
-    padding: 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12.5px;
-    line-height: 1.9;
-    color: var(--text);
-    min-height: 60px;
-  }
-  .ai-polish-loading {
-    color: var(--muted);
-    font-style: italic;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .settings-card {
-    background: var(--surface);
-    border: 1px solid var(--surface2);
-    border-radius: var(--radius);
-    padding: 18px;
-    margin-bottom: 14px;
-  }
-  .settings-label {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    display: block;
-    margin-bottom: 8px;
-  }
-  .settings-desc {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-bottom: 12px;
-  }
+  .ai-polish-header { background: linear-gradient(135deg, rgba(127,255,110,0.1), rgba(110,180,255,0.07)); padding: 10px 14px; display: flex; align-items: center; gap: 8px; }
+  .ai-polish-header-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); flex: 1; }
+  .ai-polish-close { background: none; border: none; color: var(--muted); font-size: 16px; cursor: pointer; padding: 0; line-height: 1; }
+  .ai-polish-content { background: var(--bg); padding: 14px; font-family: 'DM Mono', monospace; font-size: 12.5px; line-height: 1.9; color: var(--text); min-height: 60px; }
+  .ai-polish-loading { color: var(--muted); font-style: italic; display: flex; align-items: center; gap: 8px; }
+  .settings-card { background: var(--surface); border: 1px solid var(--surface2); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+  .settings-label { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); display: block; margin-bottom: 8px; }
+  .settings-desc { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); line-height: 1.6; margin-bottom: 12px; }
   .settings-desc a { color: var(--accent3); }
-  .settings-input {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--surface2);
-    border-radius: 8px;
-    padding: 12px;
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--text);
-    outline: none;
-    transition: border-color 0.2s;
-  }
+  .settings-input { width: 100%; background: var(--bg); border: 1px solid var(--surface2); border-radius: 8px; padding: 12px; font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text); outline: none; transition: border-color 0.2s; }
   .settings-input:focus { border-color: var(--accent); }
   .settings-input::placeholder { color: var(--muted); }
-  .settings-save {
-    margin-top: 10px;
-    width: 100%;
-    padding: 11px;
-    background: var(--accent);
-    color: #0a0a0f;
-    border: none;
-    border-radius: 8px;
-    font-family: 'Syne', sans-serif;
-    font-weight: 700;
-    font-size: 14px;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-  .settings-status {
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    margin-top: 6px;
-    text-align: center;
-    height: 14px;
-  }
+  .settings-save { margin-top: 10px; width: 100%; padding: 11px; background: var(--accent); color: #0a0a0f; border: none; border-radius: 8px; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .settings-status { font-family: 'DM Mono', monospace; font-size: 10px; margin-top: 6px; text-align: center; height: 14px; }
   .settings-status.ok { color: var(--accent); }
   .settings-status.err { color: var(--danger); }
-
-  .groq-badge {
-    display: inline-block;
-    background: rgba(127,255,110,0.1);
-    border: 1px solid rgba(127,255,110,0.3);
-    border-radius: 100px;
-    font-family: 'DM Mono', monospace;
-    font-size: 10px;
-    color: var(--accent);
-    padding: 3px 10px;
-    margin-bottom: 12px;
-    letter-spacing: 1px;
-  }
-  .groq-badge.missing {
-    background: rgba(255,79,79,0.1);
-    border-color: rgba(255,79,79,0.3);
-    color: var(--danger);
-  }
-
-  .transcribing-msg {
-    font-family: 'DM Mono', monospace;
-    font-size: 11px;
-    color: var(--accent);
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 4px;
-  }
-
-  /* All topics done state */
-  .all-done-msg {
-    text-align: center;
-    padding: 20px 0 10px;
-  }
-  .all-done-msg .done-icon {
-    font-size: 36px;
-    display: block;
-    margin-bottom: 8px;
-  }
-  .all-done-msg p {
-    font-family: 'DM Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.7;
-  }
-  .all-done-msg p strong {
-    color: var(--accent2);
-  }
+  .groq-badge { display: inline-block; background: rgba(127,255,110,0.1); border: 1px solid rgba(127,255,110,0.3); border-radius: 100px; font-family: 'DM Mono', monospace; font-size: 10px; color: var(--accent); padding: 3px 10px; margin-bottom: 12px; letter-spacing: 1px; }
+  .groq-badge.missing { background: rgba(255,79,79,0.1); border-color: rgba(255,79,79,0.3); color: var(--danger); }
+  .groq-badge.ok { background: rgba(127,255,110,0.1); border-color: rgba(127,255,110,0.3); color: var(--accent); }
+  .transcribing-msg { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
+  .all-done-msg { text-align: center; padding: 20px 0 10px; }
+  .all-done-msg .done-icon { font-size: 36px; display: block; margin-bottom: 8px; }
+  .all-done-msg p { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--muted); line-height: 1.7; }
+  .all-done-msg p strong { color: var(--accent2); }
+  .storage-info { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--muted); margin-top: 8px; padding: 8px; background: var(--bg); border-radius: 6px; line-height: 1.8; }
+  .storage-info .ok { color: var(--accent); }
+  .storage-info .warn { color: var(--accent2); }
 </style>
 </head>
 <body>
@@ -748,91 +159,72 @@
     <span class="logo">SpeakUp</span>
     <span class="logo-sub">COMM TRAINER</span>
   </div>
-  <div class="day-badge">Day <span id="streakDay">—</span> of your journey</div>
+  <div class="day-badge">Day <span id="streakDay">&#8212;</span> of your journey</div>
 </header>
 
-<div class="save-toast" id="toast">✓ Session saved!</div>
+<div class="save-toast" id="toast">&#10003; Session saved!</div>
 
 <!-- VIEW: HOME -->
 <div class="view active" id="view-home">
-  <div class="stats-row">
-    <div class="stat-box">
-      <span class="stat-num" id="stat-sessions">0</span>
-      <span class="stat-label">sessions</span>
+  <div class="draft-banner" id="draftBanner">
+    <div class="draft-banner-title">&#9888; UNSAVED SESSION FOUND</div>
+    <div class="draft-banner-body">
+      You have an unsaved recording for: <span class="draft-banner-topic" id="draftTopic">&#8212;</span><br>
+      <span id="draftMeta" style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)"></span>
     </div>
-    <div class="stat-box">
-      <span class="stat-num" id="stat-minutes">0</span>
-      <span class="stat-label">minutes</span>
-    </div>
-    <div class="stat-box">
-      <span class="stat-num" id="stat-streak">0</span>
-      <span class="stat-label">day streak</span>
+    <div class="draft-banner-actions">
+      <button class="draft-action-btn draft-btn-save" onclick="recoverDraft()">&#128190; Save It</button>
+      <button class="draft-action-btn draft-btn-discard" onclick="discardDraft()">&#10005; Discard</button>
     </div>
   </div>
 
-  <p class="section-title">today's topic</p>
+  <div class="stats-row">
+    <div class="stat-box"><span class="stat-num" id="stat-sessions">0</span><span class="stat-label">sessions</span></div>
+    <div class="stat-box"><span class="stat-num" id="stat-minutes">0</span><span class="stat-label">minutes</span></div>
+    <div class="stat-box"><span class="stat-num" id="stat-streak">0</span><span class="stat-label">day streak</span></div>
+  </div>
 
+  <p class="section-title">today&#39;s topic</p>
   <div class="topic-area">
     <div class="topic-label">SPEAK ABOUT</div>
-    <div class="topic-text topic-placeholder" id="topicDisplay">
-      Tap the button below to get your next unique topic. Each topic is shown only once.
-    </div>
+    <div class="topic-text topic-placeholder" id="topicDisplay">Tap the button below to get your next unique topic. Each topic is shown only once.</div>
     <div class="topic-progress">
-      <div class="topic-progress-bar">
-        <div class="topic-progress-fill" id="progressFill" style="width:0%"></div>
-      </div>
-      <span class="topic-progress-label" id="progressLabel">0 / 70</span>
+      <div class="topic-progress-bar"><div class="topic-progress-fill" id="progressFill" style="width:0%"></div></div>
+      <span class="topic-progress-label" id="progressLabel">0 / 60</span>
     </div>
   </div>
 
-  <button class="btn btn-primary" id="generateBtn" onclick="generateTopic()">
-    🎲 Get Next Topic
-  </button>
-  <button class="btn btn-secondary" id="startRecordBtn" onclick="goToRecord()" disabled>
-    🎙 Start Speaking
-  </button>
-  <button class="btn btn-warning" id="resetTopicsBtn" onclick="resetTopics()" style="display:none">
-    🔄 Reset All Topics
-  </button>
+  <button class="btn btn-primary" id="generateBtn" onclick="generateTopic()">&#127922; Get Next Topic</button>
+  <button class="btn btn-secondary" id="startRecordBtn" onclick="goToRecord()" disabled>&#127897; Start Speaking</button>
+  <button class="btn btn-warning" id="resetTopicsBtn" onclick="resetTopics()" style="display:none">&#128260; Reset All Topics</button>
 </div>
 
 <!-- VIEW: RECORD -->
 <div class="view" id="view-record">
   <div class="record-topic">
     <small>TOPIC</small>
-    <span id="recordTopicLabel">—</span>
+    <span id="recordTopicLabel">&#8212;</span>
   </div>
-
   <div class="waveform-container" id="waveform"></div>
-
   <div class="timer" id="timer">0:00</div>
   <div class="timer-label" id="timerLabel">TAP TO BEGIN</div>
-
   <div class="record-btn-wrap">
     <button class="record-btn" id="recordBtn" onclick="toggleRecording()"></button>
   </div>
-
   <div class="transcript-live" id="transcriptLive">
     <span class="tl-label">LIVE TRANSCRIPT</span>
-    <span class="tl-content" id="transcriptContent">Your words will appear here as you speak...</span>
+    <span id="transcriptContent">Your words will appear here as you speak...</span>
   </div>
-
-  <button class="btn btn-secondary" id="finishBtn" onclick="finishSession()" disabled>
-    ✓ Finish & Save Session
-  </button>
-  <button class="btn btn-ghost" onclick="cancelRecord()">
-    ✕ Cancel
-  </button>
+  <div class="autosave-indicator" id="autosaveIndicator"></div>
+  <button class="btn btn-secondary" id="finishBtn" onclick="finishSession()" disabled>&#10003; Finish &amp; Save Session</button>
+  <button class="btn btn-ghost" onclick="cancelRecord()">&#10005; Cancel</button>
 </div>
 
 <!-- VIEW: HISTORY -->
 <div class="view" id="view-history">
   <p class="section-title">past sessions</p>
   <div id="historyList">
-    <div class="history-empty">
-      <span class="big">📼</span>
-      No sessions yet.<br>Start speaking today!
-    </div>
+    <div class="history-empty"><span class="big">&#128252;</span>No sessions yet.<br>Start speaking today!</div>
   </div>
 </div>
 
@@ -840,752 +232,503 @@
 <div class="view" id="view-settings">
   <div class="settings-card">
     <span class="settings-label">OPENROUTER API KEY (FOR AI POLISH)</span>
-    <div id="orBadge" class="groq-badge missing">⚠ Key not set — AI Polish off</div>
-    <div class="settings-desc">
-      100% free. Get your key at <a href="https://openrouter.ai/settings/keys" target="_blank">openrouter.ai/settings/keys</a> → Create Key. No credit card needed.<br><br>
-      Only free models are used. Zero cost, ever.
-    </div>
+    <div id="orBadge" class="groq-badge missing">&#9888; Key not set &#8212; AI Polish off</div>
+    <div class="settings-desc">100% free. Get your key at <a href="https://openrouter.ai/settings/keys" target="_blank">openrouter.ai/settings/keys</a> &#8594; Create Key. No credit card needed.<br><br>Only free models are used. Zero cost, ever.</div>
     <input class="settings-input" id="orKeyInput" type="password" placeholder="sk-or-v1-..." autocomplete="off" />
     <button class="settings-save" onclick="saveORKey()">Save Key</button>
     <div class="settings-status" id="orStatus"></div>
   </div>
-
   <div class="settings-card">
     <span class="settings-label">GROQ API KEY (FOR TRANSCRIPTION)</span>
-    <div id="groqBadge" class="groq-badge missing">⚠ Key not set — transcription off</div>
-    <div class="settings-desc">
-      Groq runs Whisper and works on ALL phones/browsers.<br>
-      Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> → API Keys → Create. No credit card needed.
-    </div>
+    <div id="groqBadge" class="groq-badge missing">&#9888; Key not set &#8212; transcription off</div>
+    <div class="settings-desc">Groq runs Whisper and works on ALL phones/browsers.<br>Get a free key at <a href="https://console.groq.com" target="_blank">console.groq.com</a> &#8594; API Keys &#8594; Create. No credit card needed.</div>
     <input class="settings-input" id="groqKeyInput" type="password" placeholder="gsk_..." autocomplete="off" />
     <button class="settings-save" onclick="saveGroqKey()">Save Key</button>
     <div class="settings-status" id="groqStatus"></div>
   </div>
-
   <div class="settings-card">
     <span class="settings-label">TOPIC PROGRESS</span>
     <div class="settings-desc" id="settingsTopicProgress">Loading...</div>
     <button class="settings-save" style="background:var(--danger)" onclick="resetTopics()">Reset All Topics</button>
   </div>
+  <div class="settings-card">
+    <span class="settings-label">STORAGE INFO</span>
+    <div class="settings-desc">Audio is stored in IndexedDB (no size limit).<br>Metadata &amp; transcripts stored in localStorage (small).</div>
+    <div class="storage-info" id="storageInfo">Checking...</div>
+    <button class="settings-save" style="background:var(--danger);margin-top:14px" onclick="clearAllData()">&#128465; Clear All Sessions</button>
+  </div>
 </div>
 
 <nav>
   <button class="nav-btn active" id="nav-home" onclick="switchView('home')">
-    <span class="nav-icon">🏠</span>
-    <span class="nav-label">HOME</span>
+    <span class="nav-icon">&#127968;</span><span class="nav-label">HOME</span>
   </button>
   <button class="nav-btn" id="nav-history" onclick="switchView('history')">
-    <span class="nav-icon">📼</span>
-    <span class="nav-label">HISTORY</span>
+    <span class="nav-icon">&#128252;</span><span class="nav-label">HISTORY</span>
   </button>
   <button class="nav-btn" id="nav-settings" onclick="switchView('settings')">
-    <span class="nav-icon">⚙️</span>
-    <span class="nav-label">SETTINGS</span>
+    <span class="nav-icon">&#9881;&#65039;</span><span class="nav-label">SETTINGS</span>
   </button>
 </nav>
-
 <div class="spacer"></div>
 
 <script>
-// ─── TOPIC LIST ──────────────────────────────────────────────────────────────
-const MASTER_TOPICS = [
-  { topic: "Problems unite us, religion divides us", visited: false },
-  { topic: "Can India dream of hosting the Olympics?", visited: false },
-  { topic: "EQ vs IQ: Which matters more in real life?", visited: false },
-  { topic: "Economic growth vs ecological protection", visited: false },
-  { topic: "Can corruption be solved without catching top public figures?", visited: false },
-  { topic: "Is Indian youth confident or confused?", visited: false },
-  { topic: "Youth participation in politics: need of the hour?", visited: false },
-  { topic: "Chinese goods vs Indian goods", visited: false },
-  { topic: "Is compulsory attendance necessary in colleges?", visited: false },
-  { topic: "Should the national anthem be played in cinema halls?", visited: false },
+// ============================================================
+//  INDEXEDDB  -  audio blobs stored here, no 5MB limit
+// ============================================================
+const DB_NAME='speakup_audio_db',DB_VERSION=1,AUDIO_STORE='audio_blobs',DRAFT_STORE='drafts';
+let _db=null;
+function openDB(){
+  if(_db)return Promise.resolve(_db);
+  return new Promise((res,rej)=>{
+    const r=indexedDB.open(DB_NAME,DB_VERSION);
+    r.onupgradeneeded=e=>{const db=e.target.result;if(!db.objectStoreNames.contains(AUDIO_STORE))db.createObjectStore(AUDIO_STORE);if(!db.objectStoreNames.contains(DRAFT_STORE))db.createObjectStore(DRAFT_STORE);};
+    r.onsuccess=e=>{_db=e.target.result;res(_db);};
+    r.onerror=e=>rej(e.target.error);
+  });
+}
+async function idbSet(store,key,val){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(val,key);tx.oncomplete=res;tx.onerror=e=>rej(e.target.error);});}
+async function idbGet(store,key){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly');const r=tx.objectStore(store).get(key);r.onsuccess=e=>res(e.target.result);r.onerror=e=>rej(e.target.error);});}
+async function idbDelete(store,key){const db=await openDB();return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(key);tx.oncomplete=res;tx.onerror=e=>rej(e.target.error);});}
 
-  { topic: "Is it fair to exempt political parties from income tax scrutiny?", visited: false },
-  { topic: "Does India need a complete education system reform?", visited: false },
-  { topic: "One India One Election: pros and cons", visited: false },
-  { topic: "Should Hindi be India’s official language?", visited: false },
-  { topic: "India as a manufacturing hub: dream or reality?", visited: false },
-  { topic: "Polythene bags must be banned", visited: false },
-  { topic: "Do we really need smart cities?", visited: false },
-  { topic: "Impact of technology on the banking sector", visited: false },
-  { topic: "Is Reliance Jio a sustainable business model?", visited: false },
-  { topic: "Are digital payments secure enough for India?", visited: false },
+// ============================================================
+//  DRAFT  -  saved automatically on stop, recovered on load
+// ============================================================
+const DRAFT_KEY='current';
+async function saveDraft(data){try{await idbSet(DRAFT_STORE,DRAFT_KEY,data);showAutosave('\u25CF DRAFT SAVED');}catch(e){console.warn('Draft save failed',e);}}
+async function loadDraft(){try{return await idbGet(DRAFT_STORE,DRAFT_KEY);}catch(e){return null;}}
+async function clearDraft(){try{await idbDelete(DRAFT_STORE,DRAFT_KEY);}catch(e){}}
 
-  { topic: "Impact of social networking sites on society", visited: false },
-  { topic: "Is social media actually connecting people?", visited: false },
-  { topic: "Tobacco should be completely banned", visited: false },
-  { topic: "Is India’s Mars mission justified?", visited: false },
-  { topic: "Is India ready for electric vehicles?", visited: false },
-  { topic: "Walmart–Flipkart deal: impact on Indian economy", visited: false },
-  { topic: "Role of engineers in disaster management", visited: false },
-  { topic: "Creativity vs efficiency: what matters more?", visited: false },
-  { topic: "Should India adopt a one-child policy?", visited: false },
-  { topic: "Can India double farmers’ income?", visited: false },
+let draftInterval=null;
+function startDraftAutosave(){
+  draftInterval=setInterval(async()=>{
+    if(!isRecording)return;
+    await saveDraft({topic:currentTopic,duration:elapsedSeconds,transcript:finalTranscript.trim(),audioBlob:new Blob(audioChunks,{type:window._recordingMimeType||'audio/webm'}),mimeType:window._recordingMimeType||'audio/webm',date:new Date().toISOString()});
+  },15000);
+}
+function stopDraftAutosave(){clearInterval(draftInterval);draftInterval=null;}
 
-  { topic: "Climate change resolutions: implementation challenges", visited: false },
-  { topic: "Regional languages are fading in India", visited: false },
-  { topic: "Should Triple Talaq be banned?", visited: false },
-  { topic: "Is GST really a one nation, one tax system?", visited: false },
-  { topic: "Make in India vs Make for India", visited: false },
-  { topic: "Black money: root cause of India’s problems?", visited: false },
-  { topic: "Future of sports in India", visited: false },
-  { topic: "Future of cryptocurrencies", visited: false },
-  { topic: "Is the world ready for a cashless economy?", visited: false },
-  { topic: "Education industry has become a business", visited: false },
+async function checkForDraft(){
+  const draft=await loadDraft();
+  if(!draft)return;
+  document.getElementById('draftTopic').textContent=draft.topic||'(unknown topic)';
+  document.getElementById('draftMeta').textContent='Duration: '+formatDuration(draft.duration||0)+(draft.date?' \u00B7 '+new Date(draft.date).toLocaleString():'');
+  document.getElementById('draftBanner').classList.add('visible');
+}
 
-  { topic: "Impact of technology on jobs", visited: false },
-  { topic: "Making Aadhaar mandatory: pros and cons", visited: false },
-  { topic: "FDI in retail: good or bad for India?", visited: false },
-  { topic: "Water resources should be nationalised", visited: false },
-  { topic: "Trade helps the poor more than aid", visited: false },
-  { topic: "Privatization leads to less corruption", visited: false },
-  { topic: "Globalization vs nationalism", visited: false },
-  { topic: "Should public sector units be privatized?", visited: false },
-  { topic: "Are MNCs superior to Indian companies?", visited: false },
-  { topic: "Commercialization of healthcare: good or bad?", visited: false },
+async function recoverDraft(){
+  const banner=document.getElementById('draftBanner');
+  banner.innerHTML='<div style="font-family:\'DM Mono\',monospace;font-size:11px;color:var(--accent);display:flex;align-items:center;gap:8px"><span class="spinner spinner-light"></span>Saving recovered session...</div>';
+  const draft=await loadDraft();
+  if(!draft){banner.classList.remove('visible');return;}
+  try{
+    const id=Date.now();
+    const session={id,date:draft.date||new Date().toISOString(),topic:draft.topic,duration:draft.duration||0,transcript:draft.transcript||'[No transcript]',hasAudio:!!(draft.audioBlob&&draft.audioBlob.size>500)};
+    if(session.hasAudio)await idbSet(AUDIO_STORE,id,{blob:draft.audioBlob,mimeType:draft.mimeType});
+    saveSessionMeta(session);
+    await clearDraft();
+    banner.classList.remove('visible');
+    showToast('\u2713 Session recovered!');
+    updateStats();updateStreak();
+  }catch(e){banner.innerHTML='<div style="color:var(--danger);font-family:\'DM Mono\',monospace;font-size:11px">Recovery failed: '+e.message+'</div>';}
+}
+async function discardDraft(){await clearDraft();document.getElementById('draftBanner').classList.remove('visible');showToast('Draft discarded');}
 
-  { topic: "Capitalism is flawed but better than alternatives", visited: false },
-  { topic: "Is business ethics a myth?", visited: false },
-  { topic: "Is the consumer really the king in India?", visited: false },
-  { topic: "Advertising is a waste of resources", visited: false },
-  { topic: "Should agricultural subsidies be stopped?", visited: false },
-  { topic: "Is globalization really necessary?", visited: false },
-  { topic: "Indian villages: strength or weakness?", visited: false },
-  { topic: "Space missions: waste of resources for India?", visited: false },
-  { topic: "Population explosion: India’s biggest challenge?", visited: false },
-  { topic: "Cleanliness should be a fundamental responsibility", visited: false }
+// ============================================================
+//  TOPICS
+// ============================================================
+const MASTER_TOPICS=[
+  "Problems unite us, religion divides us","Can India dream of hosting the Olympics?","EQ vs IQ: Which matters more in real life?",
+  "Economic growth vs ecological protection","Can corruption be solved without catching top public figures?","Is Indian youth confident or confused?",
+  "Youth participation in politics: need of the hour?","Chinese goods vs Indian goods","Is compulsory attendance necessary in colleges?",
+  "Should the national anthem be played in cinema halls?","Is it fair to exempt political parties from income tax scrutiny?",
+  "Does India need a complete education system reform?","One India One Election: pros and cons","Should Hindi be India's official language?",
+  "India as a manufacturing hub: dream or reality?","Polythene bags must be banned","Do we really need smart cities?",
+  "Impact of technology on the banking sector","Is Reliance Jio a sustainable business model?","Are digital payments secure enough for India?",
+  "Impact of social networking sites on society","Is social media actually connecting people?","Tobacco should be completely banned",
+  "Is India's Mars mission justified?","Is India ready for electric vehicles?","Walmart\u2013Flipkart deal: impact on Indian economy",
+  "Role of engineers in disaster management","Creativity vs efficiency: what matters more?","Should India adopt a one-child policy?",
+  "Can India double farmers' income?","Climate change resolutions: implementation challenges","Regional languages are fading in India",
+  "Should Triple Talaq be banned?","Is GST really a one nation, one tax system?","Make in India vs Make for India",
+  "Black money: root cause of India's problems?","Future of sports in India","Future of cryptocurrencies",
+  "Is the world ready for a cashless economy?","Education industry has become a business","Impact of technology on jobs",
+  "Making Aadhaar mandatory: pros and cons","FDI in retail: good or bad for India?","Water resources should be nationalised",
+  "Trade helps the poor more than aid","Privatization leads to less corruption","Globalization vs nationalism",
+  "Should public sector units be privatized?","Are MNCs superior to Indian companies?","Commercialization of healthcare: good or bad?",
+  "Capitalism is flawed but better than alternatives","Is business ethics a myth?","Is the consumer really the king in India?",
+  "Advertising is a waste of resources","Should agricultural subsidies be stopped?","Is globalization really necessary?",
+  "Indian villages: strength or weakness?","Space missions: waste of resources for India?","Population explosion: India's biggest challenge?",
+  "Cleanliness should be a fundamental responsibility"
 ];
 
-const TOPICS_KEY = 'speakup_topics';
-const STORAGE_KEY = 'speakup_sessions';
-const OR_KEY_STORAGE = 'speakup_or_key';
-const GROQ_KEY_STORAGE = 'speakup_groq_key';
+const TOPICS_KEY='speakup_topics',STORAGE_KEY='speakup_sessions_v2',OR_KEY_STORAGE='speakup_or_key',GROQ_KEY_STORAGE='speakup_groq_key';
 
-// ─── TOPIC STATE MANAGEMENT ──────────────────────────────────────────────────
-function loadTopics() {
-  try {
-    const saved = localStorage.getItem(TOPICS_KEY);
-    if (saved) return JSON.parse(saved);
-  } catch(e) {}
-  // First time: use master list
-  return MASTER_TOPICS.map(t => ({ ...t }));
-}
+function loadTopics(){try{const s=localStorage.getItem(TOPICS_KEY);if(s)return JSON.parse(s);}catch(e){}return MASTER_TOPICS.map(t=>({topic:t,visited:false}));}
+function saveTopicsLS(t){localStorage.setItem(TOPICS_KEY,JSON.stringify(t));}
+function getUnvisited(){return loadTopics().filter(t=>!t.visited);}
+function markVisited(text){const t=loadTopics();const i=t.findIndex(x=>x.topic===text);if(i!==-1){t[i].visited=true;saveTopicsLS(t);}}
+function resetTopics(){if(!confirm('Reset all topics?'))return;saveTopicsLS(MASTER_TOPICS.map(t=>({topic:t,visited:false})));updateProgressUI();showToast('\u2713 All topics reset!');updateResetBtn();}
+function getTopicStats(){const t=loadTopics();const v=t.filter(x=>x.visited).length;return{total:t.length,visited:v,remaining:t.length-v};}
+function updateProgressUI(){const{total,visited,remaining}=getTopicStats();const pct=Math.round(visited/total*100);document.getElementById('progressFill').style.width=pct+'%';document.getElementById('progressLabel').textContent=visited+' / '+total;document.getElementById('settingsTopicProgress').textContent=visited+' of '+total+' topics completed. '+remaining+' remaining.';updateResetBtn();}
+function updateResetBtn(){document.getElementById('resetTopicsBtn').style.display=getTopicStats().visited>0?'block':'none';}
 
-function saveTopics(topics) {
-  localStorage.setItem(TOPICS_KEY, JSON.stringify(topics));
-}
+// ============================================================
+//  API
+// ============================================================
+function getORKey(){return localStorage.getItem(OR_KEY_STORAGE)||'';}
+function getGroqKey(){return localStorage.getItem(GROQ_KEY_STORAGE)||'';}
 
-function getUnvisitedTopics() {
-  return loadTopics().filter(t => !t.visited);
-}
-
-function markTopicVisited(topicText) {
-  const topics = loadTopics();
-  const idx = topics.findIndex(t => t.topic === topicText);
-  if (idx !== -1) {
-    topics[idx].visited = true;
-    saveTopics(topics);
+const MODELS=['meta-llama/llama-3.3-8b-instruct:free','meta-llama/llama-3.2-3b-instruct:free','google/gemma-3-4b-it:free','mistralai/mistral-7b-instruct:free','qwen/qwen3-1.7b:free'];
+async function callAI(prompt,maxTokens){
+  if(!getORKey())throw new Error('NO_KEY');
+  let last=null;
+  for(const model of MODELS){
+    try{
+      const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{method:'POST',headers:{'Authorization':'Bearer '+getORKey(),'Content-Type':'application/json'},body:JSON.stringify({model,max_tokens:maxTokens,messages:[{role:'user',content:prompt}]})});
+      const d=await r.json();
+      if(r.status===401||r.status===403)throw new Error('Auth failed: '+((d.error&&d.error.message)||'Invalid key'));
+      if(r.ok&&d.choices&&d.choices[0]&&d.choices[0].message)return d.choices[0].message.content.trim();
+      last=new Error((d.error&&d.error.message)||'HTTP '+r.status);
+    }catch(e){if(e.message&&e.message.startsWith('Auth failed'))throw e;last=e;}
   }
+  throw last||new Error('All models failed');
 }
 
-function resetTopics() {
-  if (!confirm('Reset all 70 topics? They will all be available again as "unvisited".')) return;
-  const fresh = MASTER_TOPICS.map(t => ({ ...t }));
-  saveTopics(fresh);
-  updateProgressUI();
-  showToast('✓ All topics reset!');
-  // Hide reset button if visible
-  updateResetBtnVisibility();
-}
+// ============================================================
+//  STATE
+// ============================================================
+let currentTopic='',isRecording=false,mediaRecorder=null,audioChunks=[],timerInterval=null,elapsedSeconds=0,finalTranscript='',interimTranscript='',recognition=null,waveBars=[];
 
-function getTopicStats() {
-  const topics = loadTopics();
-  const total = topics.length;
-  const visited = topics.filter(t => t.visited).length;
-  return { total, visited, remaining: total - visited };
-}
-
-function updateProgressUI() {
-  const { total, visited, remaining } = getTopicStats();
-  const pct = Math.round((visited / total) * 100);
-  document.getElementById('progressFill').style.width = pct + '%';
-  document.getElementById('progressLabel').textContent = visited + ' / ' + total;
-  document.getElementById('settingsTopicProgress').textContent =
-    visited + ' of ' + total + ' topics completed. ' + remaining + ' remaining.';
-  updateResetBtnVisibility();
-}
-
-function updateResetBtnVisibility() {
-  const { visited } = getTopicStats();
-  document.getElementById('resetTopicsBtn').style.display = visited > 0 ? 'block' : 'none';
-}
-
-// ─── OPENROUTER ──────────────────────────────────────────────────────────────
-function getORKey() { return localStorage.getItem(OR_KEY_STORAGE) || ''; }
-function getGroqKey() { return localStorage.getItem(GROQ_KEY_STORAGE) || ''; }
-
-const MODELS = [
-  'meta-llama/llama-3.3-8b-instruct:free',
-  'meta-llama/llama-3.2-3b-instruct:free',
-  'google/gemma-3-4b-it:free',
-  'mistralai/mistral-7b-instruct:free',
-  'qwen/qwen3-1.7b:free',
-];
-
-async function callAI(prompt, maxTokens) {
-  if (!getORKey()) throw new Error('NO_KEY');
-  let lastError = null;
-  for (const model of MODELS) {
-    try {
-      const resp = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: { 'Authorization': 'Bearer ' + getORKey(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model, max_tokens: maxTokens, messages: [{ role: 'user', content: prompt }] })
-      });
-      const data = await resp.json();
-      if (resp.status === 401 || resp.status === 403) {
-        throw new Error('Auth failed: ' + ((data.error && data.error.message) || 'Invalid API key'));
-      }
-      if (resp.ok && data.choices && data.choices[0] && data.choices[0].message) {
-        return data.choices[0].message.content.trim();
-      }
-      lastError = new Error((data.error && data.error.message) || ('HTTP ' + resp.status));
-    } catch(e) {
-      if (e.message && e.message.startsWith('Auth failed')) throw e;
-      lastError = e;
-    }
-  }
-  throw lastError || new Error('All models failed');
-}
-
-// ─── STATE ───────────────────────────────────────────────────────────────────
-let currentTopic = '';
-let isRecording = false;
-let mediaRecorder = null;
-let audioChunks = [];
-let timerInterval = null;
-let elapsedSeconds = 0;
-let finalTranscript = '';
-let interimTranscript = '';
-let recognition = null;
-let waveBars = [];
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-window.onload = function() {
-  buildWaveform();
-  updateStats();
-  updateStreak();
-  loadGroqKeyUI();
-  loadORKeyUI();
-  updateProgressUI();
+// ============================================================
+//  INIT
+// ============================================================
+window.onload=async function(){
+  buildWaveform();updateStats();updateStreak();loadGroqKeyUI();loadORKeyUI();updateProgressUI();
+  await checkForDraft();
+  updateStorageInfo();
+  // Migrate old sessions if needed
+  migrateV1();
 };
 
-function loadORKeyUI() {
-  const key = getORKey();
-  const badge = document.getElementById('orBadge');
-  const input = document.getElementById('orKeyInput');
-  if (key) {
-    input.value = key;
-    badge.className = 'groq-badge ok';
-    badge.textContent = '✓ OpenRouter key saved — AI Polish active';
-  }
+function loadORKeyUI(){const k=getORKey();if(k){document.getElementById('orKeyInput').value=k;document.getElementById('orBadge').className='groq-badge ok';document.getElementById('orBadge').textContent='\u2713 OpenRouter key saved \u2014 AI Polish active';}}
+function saveORKey(){const v=document.getElementById('orKeyInput').value.trim();const s=document.getElementById('orStatus');const b=document.getElementById('orBadge');if(v&&!v.startsWith('sk-or-')){s.className='settings-status err';s.textContent='Key should start with sk-or-...';return;}if(!v){localStorage.removeItem(OR_KEY_STORAGE);b.className='groq-badge missing';b.textContent='\u26a0 Key not set \u2014 AI Polish off';s.className='settings-status err';s.textContent='Key cleared';return;}localStorage.setItem(OR_KEY_STORAGE,v);b.className='groq-badge ok';b.textContent='\u2713 OpenRouter key saved \u2014 AI Polish active';s.className='settings-status ok';s.textContent='Saved!';setTimeout(()=>{s.textContent='';},2000);}
+function loadGroqKeyUI(){const k=getGroqKey();if(k){document.getElementById('groqKeyInput').value=k;document.getElementById('groqBadge').className='groq-badge ok';document.getElementById('groqBadge').textContent='\u2713 Groq key saved \u2014 Whisper active';}}
+function saveGroqKey(){const v=document.getElementById('groqKeyInput').value.trim();const s=document.getElementById('groqStatus');if(v&&!v.startsWith('gsk_')){s.className='settings-status err';s.textContent='Key should start with gsk_...';return;}if(!v){localStorage.removeItem(GROQ_KEY_STORAGE);document.getElementById('groqBadge').className='groq-badge missing';document.getElementById('groqBadge').textContent='\u26a0 Key not set \u2014 transcription off';s.className='settings-status err';s.textContent='Key cleared';return;}localStorage.setItem(GROQ_KEY_STORAGE,v);document.getElementById('groqBadge').className='groq-badge ok';document.getElementById('groqBadge').textContent='\u2713 Groq key saved \u2014 Whisper active';s.className='settings-status ok';s.textContent='Saved!';setTimeout(()=>{s.textContent='';},2000);}
+
+function updateStorageInfo(){
+  const el=document.getElementById('storageInfo');
+  const n=getSessions().length;
+  try{
+    let b=0;for(let k in localStorage){if(localStorage.hasOwnProperty(k))b+=(localStorage[k].length+k.length)*2;}
+    const kb=Math.round(b/1024);
+    el.innerHTML='<span class="'+(kb<3000?'ok':'warn')+'">localStorage: ~'+kb+' KB used</span><br>Sessions: '+n+' | Audio: IndexedDB (no size limit)';
+  }catch(e){el.textContent=n+' sessions stored';}
 }
 
-function saveORKey() {
-  const val = document.getElementById('orKeyInput').value.trim();
-  const status = document.getElementById('orStatus');
-  const badge = document.getElementById('orBadge');
-  if (val && !val.startsWith('sk-or-')) {
-    status.className = 'settings-status err';
-    status.textContent = 'Key should start with sk-or-...';
-    return;
-  }
-  if (!val) {
-    localStorage.removeItem(OR_KEY_STORAGE);
-    badge.className = 'groq-badge missing';
-    badge.textContent = '⚠ Key not set — AI Polish off';
-    status.className = 'settings-status err';
-    status.textContent = 'Key cleared';
-    return;
-  }
-  localStorage.setItem(OR_KEY_STORAGE, val);
-  badge.className = 'groq-badge ok';
-  badge.textContent = '✓ OpenRouter key saved — AI Polish active';
-  status.className = 'settings-status ok';
-  status.textContent = 'Saved!';
-  setTimeout(() => { status.textContent = ''; }, 2000);
+async function clearAllData(){
+  if(!confirm('Delete ALL sessions and audio? This cannot be undone.'))return;
+  localStorage.removeItem(STORAGE_KEY);
+  try{const db=await openDB();const tx=db.transaction([AUDIO_STORE,DRAFT_STORE],'readwrite');tx.objectStore(AUDIO_STORE).clear();tx.objectStore(DRAFT_STORE).clear();}catch(e){}
+  updateStats();updateStreak();updateStorageInfo();renderHistory();showToast('All sessions cleared');
 }
 
-function loadGroqKeyUI() {
-  const key = getGroqKey();
-  if (key) {
-    document.getElementById('groqKeyInput').value = key;
-    document.getElementById('groqBadge').className = 'groq-badge ok';
-    document.getElementById('groqBadge').textContent = '✓ Groq key saved — Whisper active';
-  }
+// Migrate old base64 sessions to IndexedDB
+function migrateV1(){
+  try{
+    const raw=localStorage.getItem('speakup_sessions');
+    if(!raw)return;
+    const v1=JSON.parse(raw);
+    const v2=getSessions();
+    const existIds=new Set(v2.map(s=>s.id));
+    const toAdd=[];
+    v1.forEach(s=>{
+      if(!existIds.has(s.id)){
+        const meta={id:s.id,date:s.date,topic:s.topic,duration:s.duration,transcript:s.transcript,hasAudio:false};
+        if(s.audio&&s.audio.startsWith('data:')){
+          meta.hasAudio=true;
+          fetch(s.audio).then(r=>r.blob()).then(blob=>idbSet(AUDIO_STORE,s.id,{blob,mimeType:'audio/webm'})).catch(()=>{});
+        }
+        toAdd.push(meta);
+      }
+    });
+    if(toAdd.length){
+      const merged=[...toAdd,...v2];
+      localStorage.setItem(STORAGE_KEY,JSON.stringify(merged));
+      updateStats();updateStreak();
+    }
+    localStorage.removeItem('speakup_sessions');
+  }catch(e){}
 }
 
-function saveGroqKey() {
-  const val = document.getElementById('groqKeyInput').value.trim();
-  const status = document.getElementById('groqStatus');
-  if (!val.startsWith('gsk_') && val.length > 0) {
-    status.className = 'settings-status err';
-    status.textContent = 'Key should start with gsk_...';
-    return;
-  }
-  if (!val) {
-    localStorage.removeItem(GROQ_KEY_STORAGE);
-    document.getElementById('groqBadge').className = 'groq-badge missing';
-    document.getElementById('groqBadge').textContent = '⚠ Key not set — transcription off';
-    status.className = 'settings-status err';
-    status.textContent = 'Key cleared';
-    return;
-  }
-  localStorage.setItem(GROQ_KEY_STORAGE, val);
-  document.getElementById('groqBadge').className = 'groq-badge ok';
-  document.getElementById('groqBadge').textContent = '✓ Groq key saved — Whisper active';
-  status.className = 'settings-status ok';
-  status.textContent = 'Saved!';
-  setTimeout(() => { status.textContent = ''; }, 2000);
+function buildWaveform(){const wf=document.getElementById('waveform');for(let i=0;i<16;i++){const b=document.createElement('div');b.className='wave-bar';b.style.height=(8+Math.random()*12)+'px';wf.appendChild(b);waveBars.push(b);}}
+function showAutosave(msg){const el=document.getElementById('autosaveIndicator');if(!el)return;el.textContent=msg;el.className='autosave-indicator saved';setTimeout(()=>{el.className='autosave-indicator';el.textContent='';},2500);}
+
+// ============================================================
+//  VIEWS
+// ============================================================
+function switchView(name){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('view-'+name).classList.add('active');
+  document.getElementById('nav-'+name).classList.add('active');
+  if(name==='history')renderHistory();
+  if(name==='settings'){updateProgressUI();updateStorageInfo();}
 }
 
-function buildWaveform() {
-  const wf = document.getElementById('waveform');
-  for (let i = 0; i < 16; i++) {
-    const bar = document.createElement('div');
-    bar.className = 'wave-bar';
-    bar.style.height = (8 + Math.random() * 12) + 'px';
-    wf.appendChild(bar);
-    waveBars.push(bar);
-  }
-}
-
-// ─── VIEWS ───────────────────────────────────────────────────────────────────
-function switchView(name) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('view-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'history') renderHistory();
-  if (name === 'settings') updateProgressUI();
-}
-
-function goToRecord() {
-  document.getElementById('recordTopicLabel').textContent = currentTopic;
-  document.getElementById('transcriptContent').textContent = 'Your words will appear here as you speak...';
-  document.getElementById('timer').textContent = '0:00';
-  document.getElementById('timerLabel').textContent = 'TAP TO BEGIN';
-  document.getElementById('finishBtn').disabled = true;
-  finalTranscript = '';
-  interimTranscript = '';
-  elapsedSeconds = 0;
-
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+function goToRecord(){
+  document.getElementById('recordTopicLabel').textContent=currentTopic;
+  document.getElementById('transcriptContent').textContent='Your words will appear here as you speak...';
+  document.getElementById('timer').textContent='0:00';
+  document.getElementById('timerLabel').textContent='TAP TO BEGIN';
+  document.getElementById('finishBtn').disabled=true;
+  document.getElementById('autosaveIndicator').textContent='';
+  finalTranscript='';interimTranscript='';elapsedSeconds=0;audioChunks=[];
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-record').classList.add('active');
 }
 
-function cancelRecord() {
-  if (isRecording) stopRecording();
+function cancelRecord(){
+  if(isRecording)stopRecording(false);
+  stopDraftAutosave();
   switchView('home');
 }
 
-// ─── TOPIC GENERATION — picks from unvisited list ────────────────────────────
-function generateTopic() {
-  const btn = document.getElementById('generateBtn');
-  const display = document.getElementById('topicDisplay');
-  const startBtn = document.getElementById('startRecordBtn');
-
-  const unvisited = getUnvisitedTopics();
-
-  if (unvisited.length === 0) {
-    // All done!
-    display.className = 'topic-text topic-placeholder';
-    display.innerHTML = `<div class="all-done-msg">
-      <span class="done-icon">🎉</span>
-      <p>You've completed all <strong>70 topics!</strong><br>
-      Incredible dedication. Reset to start again.</p>
-    </div>`;
-    startBtn.disabled = true;
-    currentTopic = '';
-    updateProgressUI();
-    return;
+// ============================================================
+//  TOPICS
+// ============================================================
+function generateTopic(){
+  const display=document.getElementById('topicDisplay'),startBtn=document.getElementById('startRecordBtn');
+  const unvisited=getUnvisited();
+  if(!unvisited.length){
+    display.className='topic-text topic-placeholder';
+    display.innerHTML='<div class="all-done-msg"><span class="done-icon">\ud83c\udf89</span><p>You\'ve completed all <strong>topics!</strong><br>Incredible dedication. Reset to start again.</p></div>';
+    startBtn.disabled=true;currentTopic='';updateProgressUI();return;
   }
-
-  // Pick a random unvisited topic
-  const randomIdx = Math.floor(Math.random() * unvisited.length);
-  const chosen = unvisited[randomIdx];
-  currentTopic = chosen.topic;
-
-  // Mark it as visited immediately so it won't repeat
-  markTopicVisited(currentTopic);
-
-  // Update UI
-  display.className = 'topic-text';
-  display.textContent = currentTopic;
-  startBtn.disabled = false;
-
+  const chosen=unvisited[Math.floor(Math.random()*unvisited.length)];
+  currentTopic=chosen.topic;markVisited(currentTopic);
+  display.className='topic-text';display.textContent=currentTopic;startBtn.disabled=false;
   updateProgressUI();
-
-  // Show remaining hint
-  const { remaining } = getTopicStats();
-  if (remaining === 0) {
-    showToast('🎉 Last topic! Amazing!');
-  } else {
-    showToast(remaining + ' topics remaining');
-  }
+  const{remaining}=getTopicStats();
+  showToast(remaining===0?'\ud83c\udf89 Last topic! Amazing!':remaining+' topics remaining');
 }
 
-// ─── RECORDING ───────────────────────────────────────────────────────────────
-async function toggleRecording() {
-  if (!isRecording) {
-    await startRecording();
-  } else {
-    stopRecording();
-  }
-}
+// ============================================================
+//  RECORDING
+// ============================================================
+async function toggleRecording(){if(!isRecording)await startRecording();else stopRecording(true);}
 
-async function startRecording() {
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    const mimeType = [
-      'audio/mp4', 'audio/webm;codecs=opus', 'audio/webm',
-      'audio/ogg;codecs=opus', 'audio/ogg',
-    ].find(m => MediaRecorder.isTypeSupported(m)) || '';
-
-    mediaRecorder = new MediaRecorder(stream, mimeType ? { mimeType } : {});
-    window._recordingMimeType = mediaRecorder.mimeType || mimeType || 'audio/webm';
-    audioChunks = [];
-
-    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) audioChunks.push(e.data); };
-    mediaRecorder.start(100);
-    isRecording = true;
-
+async function startRecording(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});
+    const mt=['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/ogg'].find(m=>MediaRecorder.isTypeSupported(m))||'';
+    mediaRecorder=new MediaRecorder(stream,mt?{mimeType:mt}:{});
+    window._recordingMimeType=mediaRecorder.mimeType||mt||'audio/webm';
+    audioChunks=[];
+    mediaRecorder.ondataavailable=e=>{if(e.data.size>0)audioChunks.push(e.data);};
+    mediaRecorder.start(100);isRecording=true;
     document.getElementById('recordBtn').classList.add('recording');
-    document.getElementById('timerLabel').textContent = 'RECORDING';
+    document.getElementById('timerLabel').textContent='RECORDING';
     document.getElementById('timer').classList.add('recording');
-    waveBars.forEach(b => b.classList.add('active'));
-
-    elapsedSeconds = 0;
-    timerInterval = setInterval(() => {
-      elapsedSeconds++;
-      const m = Math.floor(elapsedSeconds / 60);
-      const s = elapsedSeconds % 60;
-      document.getElementById('timer').textContent = m + ':' + String(s).padStart(2, '0');
-    }, 1000);
-
+    waveBars.forEach(b=>b.classList.add('active'));
+    elapsedSeconds=0;
+    timerInterval=setInterval(()=>{elapsedSeconds++;const m=Math.floor(elapsedSeconds/60),s=elapsedSeconds%60;document.getElementById('timer').textContent=m+':'+String(s).padStart(2,'0');},1000);
     startSpeechRecognition();
-    document.getElementById('finishBtn').disabled = false;
-  } catch (e) {
-    alert('Microphone access denied. Please allow microphone access and try again.');
-  }
+    document.getElementById('finishBtn').disabled=false;
+    startDraftAutosave();
+  }catch(e){alert('Microphone access denied. Please allow microphone access and try again.');}
 }
 
-function stopRecording() {
-  if (!isRecording) return;
-  isRecording = false;
-  if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-    mediaRecorder.stop();
-    mediaRecorder.stream.getTracks().forEach(t => t.stop());
-  }
-  if (recognition) { try { recognition.stop(); } catch(e) {} recognition = null; }
+function stopRecording(saveDraftNow=true){
+  if(!isRecording)return;
+  isRecording=false;stopDraftAutosave();
+  if(mediaRecorder&&mediaRecorder.state!=='inactive'){mediaRecorder.stop();mediaRecorder.stream.getTracks().forEach(t=>t.stop());}
+  if(recognition){try{recognition.stop();}catch(e){}recognition=null;}
   clearInterval(timerInterval);
   document.getElementById('recordBtn').classList.remove('recording');
   document.getElementById('timer').classList.remove('recording');
-  document.getElementById('timerLabel').textContent = 'STOPPED';
-  waveBars.forEach(b => { b.classList.remove('active'); b.style.height = (8 + Math.random() * 12) + 'px'; });
-}
-
-function startSpeechRecognition() {
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognition) {
-    document.getElementById('transcriptContent').innerHTML =
-      '<span class="tl-interim">Speech recognition not supported. Try Chrome on Android.</span>';
-    return;
-  }
-  recognition = new SpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = 'en-US';
-  recognition.onresult = (e) => {
-    let interim = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) finalTranscript += t + ' ';
-      else interim += t;
-    }
-    interimTranscript = interim;
-    updateTranscriptDisplay();
-  };
-  recognition.onend = () => { if (isRecording) { try { recognition.start(); } catch(e) {} } };
-  recognition.onerror = (e) => { if (e.error === 'no-speech') return; };
-  try { recognition.start(); } catch(e) {}
-}
-
-function updateTranscriptDisplay() {
-  const el = document.getElementById('transcriptContent');
-  el.innerHTML = finalTranscript +
-    (interimTranscript ? `<span class="tl-interim">${interimTranscript}</span>` : '') +
-    '<span class="cursor"></span>';
-}
-
-// ─── FINISH SESSION ───────────────────────────────────────────────────────────
-async function finishSession() {
-  stopRecording();
-  const finishBtn = document.getElementById('finishBtn');
-  finishBtn.disabled = true;
-  finishBtn.textContent = 'Saving...';
-  await new Promise(r => setTimeout(r, 800));
-
-  const mimeType = window._recordingMimeType || 'audio/webm';
-  const audioBlob = new Blob(audioChunks, { type: mimeType });
-
-  const tcEl = document.getElementById('transcriptContent');
-  const groqKey = getGroqKey();
-  let transcriptText = finalTranscript.trim();
-
-  if (groqKey && audioBlob.size > 1000) {
-    finishBtn.textContent = 'Transcribing...';
-    tcEl.innerHTML = '<div class="transcribing-msg"><span class="spinner"></span>Transcribing with Whisper...</div>';
-    try {
-      transcriptText = await groqTranscribe(audioBlob, groqKey, mimeType);
-      tcEl.textContent = transcriptText;
-    } catch(e) {
-      transcriptText = finalTranscript.trim() || '[Transcription failed: ' + e.message + ']';
-      tcEl.textContent = transcriptText;
-    }
-  } else if (groqKey && audioBlob.size <= 1000) {
-    transcriptText = '[Recording too short or empty]';
-  }
-
-  finishBtn.textContent = 'Saving...';
-
-  try {
-    const audioBase64 = await new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = e => resolve(e.target.result);
-      reader.onerror = reject;
-      reader.readAsDataURL(audioBlob);
-    });
-    const session = {
-      id: Date.now(), date: new Date().toISOString(), topic: currentTopic,
-      duration: elapsedSeconds, transcript: transcriptText || '[No transcript available]',
-      audio: audioBase64
-    };
-    saveSession(session);
-    showToast('✓ Session saved!');
-    setTimeout(() => switchView('home'), 600);
-  } catch(e) {
-    const session = {
-      id: Date.now(), date: new Date().toISOString(), topic: currentTopic,
-      duration: elapsedSeconds, transcript: transcriptText || '[No transcript available]',
-      audio: null
-    };
-    saveSession(session);
-    showToast('✓ Session saved (no audio)');
-    setTimeout(() => switchView('home'), 600);
-  }
-
-  finishBtn.disabled = false;
-  finishBtn.textContent = '✓ Finish & Save Session';
-}
-
-async function groqTranscribe(audioBlob, key, mimeType) {
-  const extMap = { 'audio/mp4': 'm4a', 'audio/webm': 'webm', 'audio/ogg': 'ogg', 'audio/mpeg': 'mp3' };
-  const baseMime = (mimeType || 'audio/webm').split(';')[0];
-  const ext = extMap[baseMime] || 'webm';
-  const formData = new FormData();
-  formData.append('file', audioBlob, 'recording.' + ext);
-  formData.append('model', 'whisper-large-v3-turbo');
-  formData.append('response_format', 'json');
-  formData.append('language', 'en');
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30000);
-  try {
-    const resp = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + key },
-      body: formData, signal: controller.signal
-    });
-    clearTimeout(timeout);
-    if (!resp.ok) { const err = await resp.text(); throw new Error('Groq HTTP ' + resp.status + ': ' + err); }
-    const data = await resp.json();
-    return (data.text || '').trim();
-  } catch(e) {
-    clearTimeout(timeout);
-    if (e.name === 'AbortError') throw new Error('Transcription timed out after 30s');
-    throw e;
+  document.getElementById('timerLabel').textContent='STOPPED \u2014 tap \u2713 to save';
+  waveBars.forEach(b=>{b.classList.remove('active');b.style.height=(8+Math.random()*12)+'px';});
+  // Save draft immediately on stop so data survives navigation/closing
+  if(saveDraftNow){
+    setTimeout(async()=>{
+      const blob=new Blob(audioChunks,{type:window._recordingMimeType||'audio/webm'});
+      await saveDraft({topic:currentTopic,duration:elapsedSeconds,transcript:finalTranscript.trim(),audioBlob:blob,mimeType:window._recordingMimeType||'audio/webm',date:new Date().toISOString()});
+    },300);
   }
 }
 
-// ─── STORAGE ─────────────────────────────────────────────────────────────────
-function getSessions() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
+function startSpeechRecognition(){
+  const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){document.getElementById('transcriptContent').innerHTML='<span class="tl-interim">Speech recognition not supported. Try Chrome on Android.</span>';return;}
+  recognition=new SR();recognition.continuous=true;recognition.interimResults=true;recognition.lang='en-US';
+  recognition.onresult=e=>{let interim='';for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)finalTranscript+=t+' ';else interim+=t;}interimTranscript=interim;updateTranscriptDisplay();};
+  recognition.onend=()=>{if(isRecording){try{recognition.start();}catch(e){}}};
+  recognition.onerror=e=>{if(e.error==='no-speech')return;};
+  try{recognition.start();}catch(e){}
+}
+function updateTranscriptDisplay(){document.getElementById('transcriptContent').innerHTML=finalTranscript+(interimTranscript?'<span class="tl-interim">'+interimTranscript+'</span>':'')+'<span class="cursor"></span>';}
+
+// ============================================================
+//  FINISH SESSION
+// ============================================================
+async function finishSession(){
+  stopRecording(false); // don't save draft; we're saving the real session
+  const btn=document.getElementById('finishBtn');
+  btn.disabled=true;btn.textContent='Processing...';
+  await new Promise(r=>setTimeout(r,300)); // let mediaRecorder flush
+
+  const mimeType=window._recordingMimeType||'audio/webm';
+  const audioBlob=new Blob(audioChunks,{type:mimeType});
+  const tcEl=document.getElementById('transcriptContent');
+  const groqKey=getGroqKey();
+  let transcript=finalTranscript.trim();
+
+  if(groqKey&&audioBlob.size>1000){
+    btn.textContent='Transcribing...';
+    tcEl.innerHTML='<div class="transcribing-msg"><span class="spinner spinner-light"></span>Transcribing with Whisper...</div>';
+    try{transcript=await groqTranscribe(audioBlob,groqKey,mimeType);tcEl.textContent=transcript;}
+    catch(e){transcript=finalTranscript.trim()||'[Transcription failed: '+e.message+']';tcEl.textContent=transcript;}
+  }else if(groqKey&&audioBlob.size<=1000){transcript='[Recording too short or empty]';}
+
+  btn.textContent='Saving...';
+  const id=Date.now();
+  const hasAudio=audioBlob.size>500;
+  if(hasAudio){try{await idbSet(AUDIO_STORE,id,{blob:audioBlob,mimeType});}catch(e){console.warn('Audio save failed:',e);}}
+
+  saveSessionMeta({id,date:new Date().toISOString(),topic:currentTopic,duration:elapsedSeconds,transcript:transcript||'[No transcript available]',hasAudio});
+  await clearDraft();
+  showToast('\u2713 Session saved!');
+  btn.disabled=false;btn.textContent='\u2713 Finish & Save Session';
+  setTimeout(()=>{updateStats();updateStreak();switchView('home');},600);
 }
 
-function saveSession(session) {
-  const sessions = getSessions();
-  sessions.unshift(session);
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-  } catch(e) {
-    while (sessions.length > 1) {
-      sessions.pop();
-      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions)); break; } catch(e2) {}
-    }
-  }
-  updateStats();
-  updateStreak();
+async function groqTranscribe(audioBlob,key,mimeType){
+  const extMap={'audio/mp4':'m4a','audio/webm':'webm','audio/ogg':'ogg','audio/mpeg':'mp3'};
+  const baseMime=(mimeType||'audio/webm').split(';')[0];
+  const ext=extMap[baseMime]||'webm';
+  const fd=new FormData();fd.append('file',audioBlob,'recording.'+ext);fd.append('model','whisper-large-v3-turbo');fd.append('response_format','json');fd.append('language','en');
+  const ctrl=new AbortController();const to=setTimeout(()=>ctrl.abort(),45000);
+  try{
+    const r=await fetch('https://api.groq.com/openai/v1/audio/transcriptions',{method:'POST',headers:{'Authorization':'Bearer '+key},body:fd,signal:ctrl.signal});
+    clearTimeout(to);
+    if(!r.ok){const e=await r.text();throw new Error('Groq HTTP '+r.status+': '+e);}
+    const d=await r.json();return(d.text||'').trim();
+  }catch(e){clearTimeout(to);if(e.name==='AbortError')throw new Error('Transcription timed out after 45s');throw e;}
 }
 
-function deleteSession(id) {
-  if (!confirm('Delete this session?')) return;
-  const sessions = getSessions().filter(s => s.id !== id);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
-  updateStats();
-  updateStreak();
-  renderHistory();
+// ============================================================
+//  STORAGE
+// ============================================================
+function getSessions(){
+  try{return JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');}catch(e){return[];}
+}
+function saveSessionMeta(s){
+  const safe={id:s.id,date:s.date,topic:s.topic,duration:s.duration,transcript:s.transcript,hasAudio:s.hasAudio};
+  const all=getSessions();all.unshift(safe);
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(all));}
+  catch(e){while(all.length>1){all.pop();try{localStorage.setItem(STORAGE_KEY,JSON.stringify(all));break;}catch(e2){}}}
+}
+function deleteSession(id){
+  if(!confirm('Delete this session?'))return;
+  const all=getSessions().filter(s=>s.id!==id);
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(all));
+  idbDelete(AUDIO_STORE,id).catch(()=>{});
+  updateStats();updateStreak();renderHistory();updateStorageInfo();
 }
 
-// ─── STATS ────────────────────────────────────────────────────────────────────
-function updateStats() {
-  const sessions = getSessions();
-  document.getElementById('stat-sessions').textContent = sessions.length;
-  const totalSec = sessions.reduce((a, s) => a + (s.duration || 0), 0);
-  document.getElementById('stat-minutes').textContent = Math.round(totalSec / 60);
+function updateStats(){const s=getSessions();document.getElementById('stat-sessions').textContent=s.length;document.getElementById('stat-minutes').textContent=Math.round(s.reduce((a,x)=>a+(x.duration||0),0)/60);}
+function updateStreak(){
+  const s=getSessions();
+  if(!s.length){document.getElementById('streakDay').textContent='1';document.getElementById('stat-streak').textContent='0';return;}
+  const dates=[...new Set(s.map(x=>x.date.split('T')[0]))].sort().reverse();
+  let streak=0,cd=new Date();
+  for(let i=0;i<365;i++){const d=cd.toISOString().split('T')[0];if(dates.includes(d)){streak++;cd.setDate(cd.getDate()-1);}else if(i===0){cd.setDate(cd.getDate()-1);}else break;}
+  document.getElementById('stat-streak').textContent=streak;
+  const first=new Date(s[s.length-1].date);
+  document.getElementById('streakDay').textContent=Math.floor((Date.now()-first)/86400000)+1;
 }
 
-function updateStreak() {
-  const sessions = getSessions();
-  if (!sessions.length) {
-    document.getElementById('streakDay').textContent = '1';
-    document.getElementById('stat-streak').textContent = '0';
-    return;
-  }
-  const dates = [...new Set(sessions.map(s => s.date.split('T')[0]))].sort().reverse();
-  let streak = 0;
-  let checkDate = new Date();
-  for (let i = 0; i < 365; i++) {
-    const d = checkDate.toISOString().split('T')[0];
-    if (dates.includes(d)) { streak++; checkDate.setDate(checkDate.getDate() - 1); }
-    else if (i === 0) { checkDate.setDate(checkDate.getDate() - 1); }
-    else { break; }
-  }
-  document.getElementById('stat-streak').textContent = streak;
-  const firstDate = new Date(sessions[sessions.length - 1].date);
-  const diff = Math.floor((Date.now() - firstDate) / 86400000) + 1;
-  document.getElementById('streakDay').textContent = diff;
-}
+// ============================================================
+//  HISTORY
+// ============================================================
+const aiCache={},txMap={};
 
-// ─── HISTORY ─────────────────────────────────────────────────────────────────
-const aiPolishCache = {};
-const transcriptMap = {};
-
-function renderHistory() {
-  const sessions = getSessions();
-  const list = document.getElementById('historyList');
-  if (!sessions.length) {
-    list.innerHTML = `<div class="history-empty"><span class="big">📼</span>No sessions yet.<br>Start speaking today!</div>`;
-    return;
-  }
-  list.innerHTML = '';
-  sessions.forEach(session => {
-    const date = new Date(session.date);
-    const dateStr = date.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
-    const timeStr = date.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
-    const dur = formatDuration(session.duration);
-    const card = document.createElement('div');
-    card.className = 'session-card';
-    card.innerHTML = `
-      <div class="session-header" onclick="toggleCard(${session.id})">
+function renderHistory(){
+  const sessions=getSessions();const list=document.getElementById('historyList');
+  if(!sessions.length){list.innerHTML='<div class="history-empty"><span class="big">\ud83d\udcfc</span>No sessions yet.<br>Start speaking today!</div>';return;}
+  list.innerHTML='';
+  sessions.forEach(s=>{
+    const d=new Date(s.date);
+    const ds=d.toLocaleDateString('en-US',{weekday:'short',month:'short',day:'numeric'});
+    const ts=d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+    const card=document.createElement('div');card.className='session-card';
+    card.innerHTML=`
+      <div class="session-header" onclick="toggleCard(${s.id})">
         <div class="session-meta">
-          <div class="session-date">${dateStr} · ${timeStr}</div>
-          <div class="session-topic-title">${escapeHtml(session.topic)}</div>
+          <div class="session-date">${ds} \u00B7 ${ts}</div>
+          <div class="session-topic-title">${esc(s.topic)}</div>
         </div>
-        <div class="session-duration">${dur}</div>
+        <div class="session-duration">${fmtDur(s.duration)}</div>
       </div>
-      <div class="session-body" id="card-${session.id}">
-        ${session.audio ? `<div class="session-audio"><audio controls preload="none"><source src="${session.audio}" type="audio/webm"></audio></div>` : ''}
-        <div class="session-transcript">${escapeHtml(session.transcript)}</div>
+      <div class="session-body" id="card-${s.id}">
+        <div id="audio-wrap-${s.id}">
+          ${s.hasAudio?`<div class="audio-loading" id="astat-${s.id}"><span class="spinner spinner-light"></span> Loading audio...</div>`:'<div style="font-family:\'DM Mono\',monospace;font-size:10px;color:var(--muted);padding-top:10px">No audio recorded</div>'}
+        </div>
+        <div class="session-transcript">${esc(s.transcript)}</div>
         <div class="session-actions">
-          <button class="ai-polish-btn" id="ai-btn-${session.id}" onclick="toggleAiPolish(${session.id})">
-            <span class="ai-icon">✨</span> AI Polish
-          </button>
-          <button class="session-delete" onclick="deleteSession(${session.id})">✕ Delete</button>
+          <button class="ai-polish-btn" id="ai-btn-${s.id}" onclick="togglePolish(${s.id})"><span class="ai-icon">\u2728</span> AI Polish</button>
+          <button class="session-delete" onclick="deleteSession(${s.id})">\u2715 Delete</button>
         </div>
-        <div class="ai-polish-section" id="ai-polish-${session.id}">
-          <div class="ai-polish-header">
-            <span class="ai-polish-header-label">✨ AI POLISHED VERSION</span>
-            <button class="ai-polish-close" onclick="closeAiPolish(${session.id})">✕</button>
-          </div>
-          <div class="ai-polish-content" id="ai-polish-content-${session.id}"></div>
+        <div class="ai-polish-section" id="ap-${s.id}">
+          <div class="ai-polish-header"><span class="ai-polish-header-label">\u2728 AI POLISHED VERSION</span><button class="ai-polish-close" onclick="closePolish(${s.id})">\u2715</button></div>
+          <div class="ai-polish-content" id="apc-${s.id}"></div>
         </div>
-      </div>
-    `;
-    transcriptMap[session.id] = session.transcript;
-    list.appendChild(card);
+      </div>`;
+    txMap[s.id]=s.transcript;list.appendChild(card);
   });
 }
 
-function toggleCard(id) {
-  document.getElementById('card-' + id).classList.toggle('open');
+function toggleCard(id){
+  const b=document.getElementById('card-'+id);b.classList.toggle('open');
+  if(b.classList.contains('open'))loadAudio(id);
+}
+async function loadAudio(id){
+  const st=document.getElementById('astat-'+id);if(!st)return;
+  try{
+    const data=await idbGet(AUDIO_STORE,id);
+    if(!data||!data.blob){st.textContent='Audio not found';return;}
+    const url=URL.createObjectURL(data.blob);
+    document.getElementById('audio-wrap-'+id).innerHTML=`<audio controls style="width:100%;border-radius:8px;outline:none;filter:invert(1) hue-rotate(90deg);margin-top:12px"><source src="${url}" type="${data.mimeType||'audio/webm'}"></audio>`;
+  }catch(e){if(st)st.textContent='Could not load audio';}
 }
 
-function formatDuration(s) {
-  if (!s) return '0:00';
-  return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0');
-}
+function fmtDur(s){if(!s)return'0:00';return Math.floor(s/60)+':'+String(s%60).padStart(2,'0');}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
-function escapeHtml(str) {
-  return String(str)
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
-
-async function toggleAiPolish(id) {
-  const section = document.getElementById('ai-polish-' + id);
-  const contentEl = document.getElementById('ai-polish-content-' + id);
-  const btn = document.getElementById('ai-btn-' + id);
-  if (section.classList.contains('open')) { section.classList.remove('open'); return; }
-  section.classList.add('open');
-  if (aiPolishCache[id]) { contentEl.innerHTML = aiPolishCache[id]; return; }
-  if (!getORKey()) {
-    contentEl.innerHTML = '<span style="color:var(--muted);font-size:11px">Add your OpenRouter key in ⚙️ Settings to use AI Polish.</span>';
-    return;
-  }
-  const transcript = transcriptMap[id] || '';
-  if (!transcript || transcript === '[No transcript available]') {
-    contentEl.innerHTML = '<span style="color:var(--muted);font-style:italic">No transcript to polish.</span>';
-    return;
-  }
+async function togglePolish(id){
+  const sec=document.getElementById('ap-'+id),cel=document.getElementById('apc-'+id),btn=document.getElementById('ai-btn-'+id);
+  if(sec.classList.contains('open')){sec.classList.remove('open');return;}
+  sec.classList.add('open');
+  if(aiCache[id]){cel.innerHTML=aiCache[id];return;}
+  if(!getORKey()){cel.innerHTML='<span style="color:var(--muted);font-size:11px">Add your OpenRouter key in \u2699\ufe0f Settings to use AI Polish.</span>';return;}
+  const tx=txMap[id]||'';
+  if(!tx||tx==='[No transcript available]'){cel.innerHTML='<span style="color:var(--muted);font-style:italic">No transcript to polish.</span>';return;}
   btn.classList.add('loading');
-  contentEl.innerHTML = '<div class="ai-polish-loading"><span class="spinner"></span>Polishing your speech...</div>';
-  try {
-    const polished = await callAI(
-      'You are a communication coach. Below is a raw speech transcript from voice-to-text. Fix ALL grammar and spelling errors. Add smooth transitions between ideas. Keep the EXACT same meaning and personal voice. Return ONLY the polished text.\n\nRaw transcript:\n' + transcript,
-      700
-    );
-    const paragraphs = polished.split(/\n\n+/).map(p => '<p style="margin-bottom:10px">' + p.replace(/\n/g, ' ') + '</p>').join('');
-    contentEl.innerHTML = paragraphs;
-    aiPolishCache[id] = paragraphs;
-  } catch(e) {
-    let errMsg = e.message || 'Unknown error';
-    if (errMsg === 'NO_KEY' || errMsg.includes('Auth failed')) errMsg = 'Add your OpenRouter key in ⚙️ Settings first.';
-    contentEl.innerHTML = '<span style="color:var(--danger);font-size:11px">' + errMsg + '</span>';
+  cel.innerHTML='<div class="ai-polish-loading"><span class="spinner spinner-light"></span>Polishing your speech...</div>';
+  try{
+    const p=await callAI('You are a communication coach. Fix ALL grammar/spelling errors in this raw speech transcript. Add smooth transitions. Keep the EXACT same meaning and personal voice. Return ONLY the polished text.\n\nRaw:\n'+tx,700);
+    const html=p.split(/\n\n+/).map(x=>'<p style="margin-bottom:10px">'+x.replace(/\n/g,' ')+'</p>').join('');
+    cel.innerHTML=html;aiCache[id]=html;
+  }catch(e){
+    let m=e.message||'Unknown error';if(m==='NO_KEY'||m.includes('Auth failed'))m='Add your OpenRouter key in \u2699\ufe0f Settings first.';
+    cel.innerHTML='<span style="color:var(--danger);font-size:11px">'+m+'</span>';
   }
   btn.classList.remove('loading');
 }
+function closePolish(id){document.getElementById('ap-'+id).classList.remove('open');}
 
-function closeAiPolish(id) {
-  document.getElementById('ai-polish-' + id).classList.remove('open');
-}
-
-function showToast(msg) {
-  const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 2500);
-}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2500);}
 </script>
 </body>
 </html>
-
