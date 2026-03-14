@@ -1,13 +1,14 @@
 /* ══════════════════════════════════════════
-   VOICE DIARY — app.js
-   IndexedDB · PIN · Groq STT · AI Polish
+   JOURNAL — app.js  (clean rewrite)
+   Fixes: PIN auth · back nav · play · delete · title
 ══════════════════════════════════════════ */
 'use strict';
 
-// ─── INDEXEDDB ────────────────────────────
-// DB_VER 2: added 'audio' object store (out-of-line keys)
-// 'entries' store uses keyPath:'id' (inline) — never pass a separate key
-// 'audio'   store has no keyPath       (out-of-line) — always pass a key
+/* ════════════════════════════════════════
+   INDEXEDDB
+   'entries' store  → keyPath:'id' (inline key)
+   'audio'   store  → no keyPath   (explicit key)
+════════════════════════════════════════ */
 const DB_NAME = 'VoiceDiaryDB', DB_VER = 2;
 let _db = null;
 
@@ -20,72 +21,66 @@ function openDB() {
       if (!db.objectStoreNames.contains('entries'))
         db.createObjectStore('entries', { keyPath: 'id' });
       if (!db.objectStoreNames.contains('audio'))
-        db.createObjectStore('audio');   // out-of-line keys
+        db.createObjectStore('audio');
     };
     r.onsuccess = e => { _db = e.target.result; res(_db); };
     r.onerror   = e => rej(e.target.error);
   });
 }
 
-// entries store: inline key — val must contain val.id, do NOT pass key arg
-// audio   store: out-of-line key — pass key separately
-async function idbSetEntry(val) {
-  const db = await openDB();
-  return new Promise((res, rej) => {
+function idbSetEntry(val) {
+  return openDB().then(db => new Promise((res, rej) => {
     const tx = db.transaction('entries', 'readwrite');
-    tx.objectStore('entries').put(val);   // key comes from val.id
+    tx.objectStore('entries').put(val);
     tx.oncomplete = res;
     tx.onerror = e => rej(e.target.error);
-  });
+  }));
 }
-async function idbSetAudio(key, val) {
-  const db = await openDB();
-  return new Promise((res, rej) => {
+function idbSetAudio(key, val) {
+  return openDB().then(db => new Promise((res, rej) => {
     const tx = db.transaction('audio', 'readwrite');
-    tx.objectStore('audio').put(val, key);  // explicit key
+    tx.objectStore('audio').put(val, key);
     tx.oncomplete = res;
     tx.onerror = e => rej(e.target.error);
-  });
+  }));
 }
-async function idbGet(store, key) {
-  const db = await openDB();
-  return new Promise((res, rej) => {
+function idbGet(store, key) {
+  return openDB().then(db => new Promise((res, rej) => {
     const tx = db.transaction(store, 'readonly');
     const r  = tx.objectStore(store).get(key);
     r.onsuccess = e => res(e.target.result);
     r.onerror   = e => rej(e.target.error);
-  });
+  }));
 }
-async function idbDelete(store, key) {
-  const db = await openDB();
-  return new Promise((res, rej) => {
+function idbDelete(store, key) {
+  return openDB().then(db => new Promise((res, rej) => {
     const tx = db.transaction(store, 'readwrite');
     tx.objectStore(store).delete(key);
     tx.oncomplete = res;
     tx.onerror = e => rej(e.target.error);
-  });
+  }));
 }
-async function idbAllEntries() {
-  const db = await openDB();
-  return new Promise((res, rej) => {
+function idbAllEntries() {
+  return openDB().then(db => new Promise((res, rej) => {
     const tx = db.transaction('entries', 'readonly');
     const r  = tx.objectStore('entries').getAll();
-    r.onsuccess = e => res(e.target.result.sort((a,b) => b.createdAt - a.createdAt));
+    r.onsuccess = e => res(e.target.result.sort((a, b) => b.createdAt - a.createdAt));
     r.onerror   = e => rej(e.target.error);
-  });
+  }));
 }
-async function idbClearAll() {
-  const db = await openDB();
-  return new Promise((res, rej) => {
-    const tx = db.transaction(['entries','audio'], 'readwrite');
+function idbClearAll() {
+  return openDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction(['entries', 'audio'], 'readwrite');
     tx.objectStore('entries').clear();
     tx.objectStore('audio').clear();
     tx.oncomplete = res;
     tx.onerror = e => rej(e.target.error);
-  });
+  }));
 }
 
-// ─── SETTINGS (localStorage) ─────────────
+/* ════════════════════════════════════════
+   SETTINGS — localStorage
+════════════════════════════════════════ */
 const LS = {
   get pin()      { return localStorage.getItem('vd_pin') || ''; },
   set pin(v)     { localStorage.setItem('vd_pin', v); },
@@ -93,35 +88,53 @@ const LS = {
   set groqKey(v) { localStorage.setItem('vd_groq', v); },
 };
 
-// ─── APP STATE ────────────────────────────
+/* ════════════════════════════════════════
+   STATE
+════════════════════════════════════════ */
 const S = {
+  // PIN
   pinBuffer:     '',
   isSetup:       false,
+
+  // Entry
   currentId:     null,
 
+  // Recording
   mediaRecorder: null,
   audioChunks:   [],
   mimeType:      '',
   recSeconds:    0,
   recInterval:   null,
   isRecording:   false,
+
+  // Player
+  playerActive:  false,
 };
 
-// ─── HELPERS ─────────────────────────────
-const $     = id => document.getElementById(id);
-const fmtT  = s  => {
-  s = Math.max(0, Math.round(s));
-  return String(Math.floor(s/60)).padStart(2,'0') + ':' + String(s%60).padStart(2,'0');
-};
-const fmtDate = ts =>
-  new Date(ts).toLocaleDateString('en-IN', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
-const fmtShort = ts =>
-  new Date(ts).toLocaleTimeString('en-IN', { hour:'2-digit', minute:'2-digit' });
-const esc = s =>
-  String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+/* ════════════════════════════════════════
+   HELPERS
+════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
 
+function fmtT(s) {
+  s = Math.max(0, Math.round(s || 0));
+  return String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
+}
+function fmtDate(ts) {
+  return new Date(ts).toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+}
+function fmtShort(ts) {
+  return new Date(ts).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+}
+function esc(s) {
+  return String(s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
 function getSupportedMime() {
-  const list = ['audio/mp4','audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus','audio/ogg'];
+  const list = ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/ogg'];
   return list.find(t => MediaRecorder.isTypeSupported(t)) || '';
 }
 function mimeToExt(m) {
@@ -131,31 +144,58 @@ function mimeToExt(m) {
   return 'webm';
 }
 
-// ─── SCREENS ─────────────────────────────
+/* ════════════════════════════════════════
+   SCREENS
+════════════════════════════════════════ */
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   $(id).classList.add('active');
 }
 
-// ─── TOAST ───────────────────────────────
-let _tt;
+/* ════════════════════════════════════════
+   TOAST
+════════════════════════════════════════ */
+let _toastTimer;
 function toast(msg) {
   let t = document.querySelector('.toast');
-  if (!t) { t = document.createElement('div'); t.className = 'toast'; document.body.appendChild(t); }
+  if (!t) {
+    t = document.createElement('div');
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
   t.textContent = msg;
   t.classList.add('show');
-  clearTimeout(_tt);
-  _tt = setTimeout(() => t.classList.remove('show'), 2600);
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-// ══════════════════════════════════════════
-//  PIN
-// ══════════════════════════════════════════
+/* ════════════════════════════════════════
+   PLAYER helpers  (safe — won't crash if elements missing)
+════════════════════════════════════════ */
+function setPlayIcon(playing) {
+  const pi = $('playIcon'), pa = $('pauseIcon');
+  if (!pi || !pa) return;
+  pi.style.display = playing ? 'none' : '';
+  pa.style.display = playing ? ''     : 'none';
+}
+
+function stopPlayer() {
+  const a = $('audioPlayer');
+  if (a) { a.pause(); a.removeAttribute('src'); a.load(); }
+  setPlayIcon(false);
+  const wp = $('waveformProgress');
+  if (wp) wp.style.width = '0%';
+  S.playerActive = false;
+}
+
+/* ════════════════════════════════════════
+   PIN SCREEN
+════════════════════════════════════════ */
 function initLock() {
   S.isSetup   = !LS.pin;
   S.pinBuffer = '';
-  $('pinLabel').textContent = S.isSetup ? 'Create a 4-digit PIN' : 'Enter PIN';
-  $('pinHint').textContent  = S.isSetup ? "You'll use this to unlock your diary" : '';
+  $('pinLabel').textContent = S.isSetup ? 'Create a 4-digit PIN' : 'Enter your PIN';
+  $('pinHint').textContent  = '';
   renderDots();
 }
 
@@ -167,7 +207,7 @@ function renderDots() {
 }
 
 function pinInput(val) {
-  if (val === 'del') { S.pinBuffer = S.pinBuffer.slice(0,-1); renderDots(); return; }
+  if (val === 'del') { S.pinBuffer = S.pinBuffer.slice(0, -1); renderDots(); return; }
   if (val === 'ok')  { if (S.pinBuffer.length === 4) submitPin(); return; }
   if (S.pinBuffer.length >= 4) return;
   S.pinBuffer += val;
@@ -178,7 +218,7 @@ function pinInput(val) {
 function submitPin() {
   if (S.isSetup) {
     LS.pin = S.pinBuffer;
-    toast('PIN set! 🔐');
+    toast('PIN created');
     showScreen('homeScreen');
     loadHome();
   } else {
@@ -197,37 +237,74 @@ document.querySelectorAll('.num-btn').forEach(btn =>
   btn.addEventListener('click', () => pinInput(btn.dataset.num))
 );
 
-// ══════════════════════════════════════════
-//  SETTINGS
-// ══════════════════════════════════════════
+/* ════════════════════════════════════════
+   SETTINGS SCREEN
+   — PIN change requires current PIN first
+════════════════════════════════════════ */
 $('homeSettingsBtn').addEventListener('click', openSettings);
-$('homeLockBtn').addEventListener('click', () => { stopPlayer(); initLock(); showScreen('lockScreen'); });
-$('settingsBack').addEventListener('click', () => { showScreen('homeScreen'); loadHome(); });
+$('homeLockBtn').addEventListener('click', () => {
+  stopPlayer();
+  initLock();
+  showScreen('lockScreen');
+});
+$('settingsBack').addEventListener('click', () => {
+  showScreen('homeScreen');
+  loadHome();
+});
 
 function openSettings() {
-  $('groqKeyInput').value      = LS.groqKey ? '••••••••' : '';
-  $('groqSaveMsg').textContent = '';
+  // Reset all fields
+  $('currentPinInput').value   = '';
   $('newPinInput').value       = '';
   $('pinSaveMsg').textContent  = '';
+  $('pinSaveMsg').style.color  = '';
+  $('groqKeyInput').value      = LS.groqKey ? '••••••••' : '';
+  $('groqSaveMsg').textContent = '';
+  $('groqSaveMsg').style.color = '';
   showScreen('settingsScreen');
 }
 
 $('savePinBtn').addEventListener('click', () => {
-  const v = $('newPinInput').value.trim();
-  const m = $('pinSaveMsg');
-  if (!/^\d{4}$/.test(v)) { m.style.color='#e53935'; m.textContent='⚠ Must be exactly 4 digits'; return; }
-  LS.pin = v;
-  m.style.color = ''; m.textContent = '✓ PIN updated';
-  $('newPinInput').value = '';
+  const cur = $('currentPinInput').value.trim();
+  const nw  = $('newPinInput').value.trim();
+  const m   = $('pinSaveMsg');
+
+  // If a PIN already exists, require the current one
+  if (LS.pin && cur !== LS.pin) {
+    m.style.color  = 'var(--danger)';
+    m.textContent  = 'Current PIN is incorrect';
+    $('currentPinInput').value = '';
+    return;
+  }
+  if (!/^\d{4}$/.test(nw)) {
+    m.style.color = 'var(--danger)';
+    m.textContent = 'New PIN must be exactly 4 digits';
+    return;
+  }
+
+  LS.pin = nw;
+  m.style.color = '';
+  m.textContent = 'PIN updated successfully';
+  $('currentPinInput').value = '';
+  $('newPinInput').value     = '';
 });
 
 $('saveGroqBtn').addEventListener('click', () => {
   const v = $('groqKeyInput').value.trim();
   const m = $('groqSaveMsg');
-  if (!v || v === '••••••••') { m.style.color='#e53935'; m.textContent='⚠ Enter a valid key'; return; }
-  if (!v.startsWith('gsk_'))  { m.style.color='#e53935'; m.textContent='⚠ Key should start with gsk_...'; return; }
+  if (!v || v === '••••••••') {
+    m.style.color = 'var(--danger)';
+    m.textContent = 'Enter a valid key';
+    return;
+  }
+  if (!v.startsWith('gsk_')) {
+    m.style.color = 'var(--danger)';
+    m.textContent = 'Key should start with gsk_...';
+    return;
+  }
   LS.groqKey = v;
-  m.style.color = ''; m.textContent = '✓ API key saved';
+  m.style.color = '';
+  m.textContent = 'API key saved';
   $('groqKeyInput').value = '••••••••';
 });
 
@@ -239,10 +316,14 @@ $('deleteAllBtn').addEventListener('click', async () => {
   loadHome();
 });
 
-// ══════════════════════════════════════════
-//  HOME
-// ══════════════════════════════════════════
+/* ════════════════════════════════════════
+   HOME SCREEN
+════════════════════════════════════════ */
 async function loadHome() {
+  $('homeDate').textContent = new Date().toLocaleDateString('en-IN', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
   const entries = await idbAllEntries();
   const list    = $('entriesList');
   list.innerHTML = '';
@@ -250,44 +331,115 @@ async function loadHome() {
   if (!entries.length) {
     list.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">🎙️</div>
-        <p class="empty-title">No entries yet</p>
-        <p class="empty-sub">Tap the mic button below to record your first diary entry</p>
+        <div class="empty-line"></div>
+        <p class="empty-title">Nothing here yet</p>
+        <p class="empty-sub">Tap the mic button to record your first entry</p>
       </div>`;
     return;
   }
 
-  entries.forEach(entry => {
-    const card    = document.createElement('div');
-    card.className = 'entry-card';
+  entries.forEach((entry, idx) => {
+    const title   = entry.title || 'Untitled entry';
     const preview = entry.transcript
-      ? esc(entry.transcript.slice(0,65)) + (entry.transcript.length > 65 ? '…' : '')
-      : 'Voice entry';
+      ? esc(entry.transcript.slice(0, 72)) + (entry.transcript.length > 72 ? '…' : '')
+      : '';
+
+    // Outer wrapper
+    const wrap = document.createElement('div');
+    wrap.className = 'entry-wrap';
+    wrap.style.animationDelay = (idx * 40) + 'ms';
+
+    // ── Inline title edit row (sits above card) ──
+    const editRow = document.createElement('div');
+    editRow.className = 'entry-title-edit-row';
+    editRow.innerHTML = `
+      <span class="entry-title-label">${esc(title)}</span>
+      <button class="entry-edit-btn" title="Rename">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+          <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+        </svg>
+      </button>
+      <input class="entry-title-input-inline" type="text" maxlength="80" placeholder="Entry title…" value="${esc(title)}" />
+      <button class="entry-edit-save" title="Save">&#10003;</button>
+      <button class="entry-edit-cancel" title="Cancel">&#10005;</button>
+    `;
+
+    const labelEl  = editRow.querySelector('.entry-title-label');
+    const editBtn  = editRow.querySelector('.entry-edit-btn');
+    const inputEl  = editRow.querySelector('.entry-title-input-inline');
+    const saveBtn  = editRow.querySelector('.entry-edit-save');
+    const cancelBtn = editRow.querySelector('.entry-edit-cancel');
+
+    function startEdit(e) {
+      e.stopPropagation();
+      editRow.classList.add('editing');
+      inputEl.value = entry.title || '';
+      inputEl.focus();
+      inputEl.select();
+    }
+    function cancelEdit(e) {
+      e && e.stopPropagation();
+      editRow.classList.remove('editing');
+      inputEl.value = entry.title || '';
+    }
+    async function commitEdit(e) {
+      e && e.stopPropagation();
+      const newTitle = inputEl.value.trim() || 'Untitled entry';
+      editRow.classList.remove('editing');
+      if (newTitle === (entry.title || 'Untitled entry')) return;
+      entry.title = newTitle;
+      labelEl.textContent = newTitle;
+      // also update card heading
+      const cardTitle = card.querySelector('.entry-card-title');
+      if (cardTitle) cardTitle.textContent = newTitle;
+      try {
+        const stored = await idbGet('entries', entry.id);
+        if (stored) { stored.title = newTitle; await idbSetEntry(stored); }
+      } catch(err) { console.warn('Title save failed', err); }
+      toast('Title updated');
+    }
+
+    editBtn.addEventListener('click', startEdit);
+    saveBtn.addEventListener('click', commitEdit);
+    cancelBtn.addEventListener('click', cancelEdit);
+    inputEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); commitEdit(); }
+      if (e.key === 'Escape') cancelEdit();
+    });
+    // stop clicks inside editRow bubbling to card
+    editRow.addEventListener('click', e => e.stopPropagation());
+
+    // ── Card ──
+    const card = document.createElement('div');
+    card.className = 'entry-card';
     card.innerHTML = `
-      <div class="entry-thumb">🎙️</div>
-      <div class="entry-info">
-        <div class="entry-title">${preview}</div>
-        <div class="entry-meta">
-          <span>${fmtDate(entry.createdAt)}</span>
-          <span class="entry-duration">${fmtT(entry.duration || 0)}</span>
-        </div>
+      <div class="entry-card-title">${esc(title)}</div>
+      ${preview ? `<div class="entry-card-preview">${preview}</div>` : ''}
+      <div class="entry-card-meta">
+        <span class="entry-card-date">${fmtDate(entry.createdAt)}</span>
+        <span class="entry-card-dur">${fmtT(entry.duration)}</span>
       </div>`;
     card.addEventListener('click', () => openEntry(entry.id));
-    list.appendChild(card);
+
+    wrap.appendChild(editRow);
+    wrap.appendChild(card);
+    list.appendChild(wrap);
   });
 }
 
 $('newEntryBtn').addEventListener('click', openNewEntry);
 
-// ══════════════════════════════════════════
-//  NEW ENTRY — RECORD
-// ══════════════════════════════════════════
+/* ════════════════════════════════════════
+   NEW ENTRY — RECORD SCREEN
+════════════════════════════════════════ */
 function openNewEntry() {
   S.currentId   = null;
   S.audioChunks = [];
   S.mimeType    = '';
 
-  $('entryDateTitle').textContent = 'New Entry';
+  $('entryNavTitle').textContent    = 'New Entry';
+  $('entryTitleInput').value        = '';
   $('playerArea').classList.add('hidden');
   $('transcriptArea').classList.add('hidden');
   $('recordSection').classList.remove('hidden');
@@ -297,24 +449,26 @@ function openNewEntry() {
 
 function resetRecordUI() {
   $('recordTimer').textContent      = '00:00';
-  $('recordHint').textContent       = 'Tap to start recording';
+  $('recordHint').textContent       = 'Tap to begin recording';
   $('recordRing').classList.remove('recording');
   $('recordBtn').classList.remove('recording');
   $('recordBtn').disabled           = false;
-  $('recordIcon').textContent       = '🎙️';
+  $('recMicIcon').style.display     = '';
+  $('recStopIcon').style.display    = 'none';
   $('recordControls').style.display = 'none';
   $('saveRecordBtn').disabled       = true;
-  $('saveRecordBtn').textContent    = '✓ Save';
+  $('saveRecordBtn').textContent    = 'Save Entry';
 }
 
+// ── Back button — works from both record and playback views ──
 $('entryBack').addEventListener('click', () => {
-  hardStop();
-  stopPlayer();
+  hardStop();      // kills recording if active (safe noop otherwise)
+  stopPlayer();    // pauses audio if playing (safe noop otherwise)
   showScreen('homeScreen');
   loadHome();
 });
 
-// ── Record / Stop button ──
+// ── Record / Stop toggle ──
 $('recordBtn').addEventListener('click', () => {
   if (!S.isRecording) startRecording();
   else stopRecording();
@@ -328,7 +482,6 @@ $('cancelRecordBtn').addEventListener('click', () => {
 
 $('saveRecordBtn').addEventListener('click', saveEntry);
 
-// ── Start recording ──
 async function startRecording() {
   try {
     const stream    = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -343,12 +496,13 @@ async function startRecording() {
       if (e.data && e.data.size > 0) S.audioChunks.push(e.data);
     };
 
-    S.mediaRecorder.start(100);   // flush chunks every 100 ms
+    S.mediaRecorder.start(100);
 
     $('recordRing').classList.add('recording');
     $('recordBtn').classList.add('recording');
-    $('recordIcon').textContent       = '⏹';
-    $('recordHint').textContent       = 'Recording… tap to stop';
+    $('recMicIcon').style.display     = 'none';
+    $('recStopIcon').style.display    = '';
+    $('recordHint').textContent       = 'Recording — tap to stop';
     $('recordControls').style.display = 'flex';
     $('saveRecordBtn').disabled       = true;
 
@@ -359,11 +513,10 @@ async function startRecording() {
 
   } catch (err) {
     console.error(err);
-    toast('🎤 Microphone access denied');
+    toast('Microphone access denied');
   }
 }
 
-// ── Stop recording — wait for onstop to flush all chunks ──
 function stopRecording() {
   if (!S.mediaRecorder || S.mediaRecorder.state === 'inactive') return;
 
@@ -372,57 +525,58 @@ function stopRecording() {
 
   $('recordRing').classList.remove('recording');
   $('recordBtn').classList.remove('recording');
-  $('recordBtn').disabled     = true;   // prevent double-tap
-  $('recordIcon').textContent = '🎙️';
-  $('recordHint').textContent = 'Stopping…';
+  $('recordBtn').disabled        = true;
+  $('recMicIcon').style.display  = '';
+  $('recStopIcon').style.display = 'none';
+  $('recordHint').textContent    = 'Finishing…';
 
-  // onstop fires after all ondataavailable events are done
+  // onstop fires after ALL ondataavailable chunks are flushed — safe to blob here
   S.mediaRecorder.onstop = () => {
-    S.mediaRecorder.stream.getTracks().forEach(t => t.stop());
-    $('recordBtn').disabled           = false;
-    $('recordHint').textContent       = 'Done! Tap "Save Entry"';
-    $('saveRecordBtn').disabled       = false;
-    $('saveRecordBtn').textContent    = '✓ Save Entry';
-    toast('Done recording! Tap Save.');
+    try { S.mediaRecorder.stream.getTracks().forEach(t => t.stop()); } catch (_) {}
+    $('recordBtn').disabled        = false;
+    $('recordHint').textContent    = 'Done — give it a title and save';
+    $('saveRecordBtn').disabled    = false;
+    $('saveRecordBtn').textContent = 'Save Entry';
+    $('entryTitleInput').focus();
+    toast('Recording complete');
   };
 
   S.mediaRecorder.stop();
 }
 
-// ── Hard stop (cancel / navigate away) ──
 function hardStop() {
   if (!S.mediaRecorder) return;
   clearInterval(S.recInterval);
   S.isRecording = false;
   S.mediaRecorder.ondataavailable = null;
   S.mediaRecorder.onstop = () => {
-    try { S.mediaRecorder.stream.getTracks().forEach(t => t.stop()); } catch(e) {}
+    try { S.mediaRecorder.stream.getTracks().forEach(t => t.stop()); } catch (_) {}
   };
   if (S.mediaRecorder.state !== 'inactive') S.mediaRecorder.stop();
   S.mediaRecorder = null;
   S.audioChunks   = [];
 }
 
-// ── Save entry ──
 async function saveEntry() {
   const blob = new Blob(S.audioChunks, { type: S.mimeType || 'audio/webm' });
 
   if (!blob || blob.size < 100) {
-    toast('⚠ Nothing recorded yet');
+    toast('Nothing recorded yet');
     return;
   }
 
   const btn = $('saveRecordBtn');
   btn.disabled    = true;
-  btn.textContent = '⏳ Saving…';
+  btn.textContent = 'Saving…';
 
   const id      = Date.now().toString();
   const created = Date.now();
+  const title   = ($('entryTitleInput').value || '').trim() || 'Untitled entry';
 
-  // Auto-transcribe if Groq key is set
+  // Auto-transcribe if Groq key present
   let transcript = '';
   if (LS.groqKey) {
-    btn.textContent = '⏳ Transcribing…';
+    btn.textContent = 'Transcribing…';
     try {
       transcript = await groqTranscribe(blob, LS.groqKey, S.mimeType);
     } catch (err) {
@@ -430,27 +584,27 @@ async function saveEntry() {
     }
   }
 
-  // Store audio blob in its own store (no size limits)
+  // Store audio (separate store, no 5 MB limit)
   try {
     await idbSetAudio(id, { blob, mimeType: S.mimeType });
   } catch (e) {
     console.warn('Audio store error:', e);
   }
 
-  // Store entry
-  const entry = { id, createdAt: created, duration: S.recSeconds, mimeType: S.mimeType, transcript };
+  // Store entry metadata + transcript + title
+  const entry = { id, createdAt: created, duration: S.recSeconds, mimeType: S.mimeType, transcript, title };
   await idbSetEntry(entry);
 
   S.currentId   = id;
   S.audioChunks = [];
 
-  toast('Entry saved! ✓');
-  await openEntry(id);   // switch to playback view
+  toast('Entry saved');
+  await openEntry(id);
 }
 
-// ══════════════════════════════════════════
-//  VIEW EXISTING ENTRY
-// ══════════════════════════════════════════
+/* ════════════════════════════════════════
+   VIEW EXISTING ENTRY
+════════════════════════════════════════ */
 async function openEntry(id) {
   S.currentId = id;
 
@@ -461,18 +615,21 @@ async function openEntry(id) {
 
   if (!entry) { toast('Entry not found'); return; }
 
-  $('entryDateTitle').textContent = fmtDate(entry.createdAt);
-  $('playerDate').textContent     = fmtDate(entry.createdAt);
-  $('playerTime').textContent     = fmtShort(entry.createdAt);
+  // Nav + title
+  $('entryNavTitle').textContent    = entry.title || 'Untitled entry';
+  $('playerEntryTitle').textContent = entry.title || 'Untitled entry';
+  $('playerDate').textContent       = fmtDate(entry.createdAt);
+  $('playerTime').textContent       = fmtShort(entry.createdAt);
 
+  // Audio player
   if (audioRec && audioRec.blob) {
-    const url = URL.createObjectURL(audioRec.blob);
-    setupPlayer(url, entry.duration || 0);
+    setupPlayer(audioRec.blob, entry.duration);
     $('playerArea').classList.remove('hidden');
   } else {
     $('playerArea').classList.add('hidden');
   }
 
+  // Transcript
   $('transcriptArea').classList.remove('hidden');
   if (entry.transcript) {
     $('transcriptPlaceholder').classList.add('hidden');
@@ -482,6 +639,8 @@ async function openEntry(id) {
     $('transcriptText').textContent = '';
   }
   $('transcriptStatus').textContent = '';
+
+  // Hide record UI
   $('recordSection').classList.add('hidden');
 
   showScreen('entryScreen');
@@ -489,13 +648,22 @@ async function openEntry(id) {
 
 // ── Delete ──
 $('deleteEntryBtn').addEventListener('click', async () => {
-  if (!S.currentId) { showScreen('homeScreen'); loadHome(); return; }
+  if (!S.currentId) {
+    showScreen('homeScreen');
+    loadHome();
+    return;
+  }
   if (!confirm('Delete this entry?')) return;
-  await Promise.all([
-    idbDelete('entries', S.currentId),
-    idbDelete('audio',   S.currentId),
-  ]);
+
+  const id = S.currentId;
+  S.currentId = null;
   stopPlayer();
+
+  await Promise.all([
+    idbDelete('entries', id),
+    idbDelete('audio',   id),
+  ]);
+
   toast('Entry deleted');
   showScreen('homeScreen');
   loadHome();
@@ -503,87 +671,97 @@ $('deleteEntryBtn').addEventListener('click', async () => {
 
 // ── Share ──
 $('shareEntryBtn').addEventListener('click', async () => {
-  if (!S.currentId) { toast('Save the entry first'); return; }
+  if (!S.currentId) { toast('No entry to share'); return; }
   const entry = await idbGet('entries', S.currentId);
   if (!entry) return;
-  const text = entry.transcript
-    ? `🎙️ Voice Diary — ${fmtDate(entry.createdAt)}\n\n${entry.transcript}`
-    : `🎙️ Voice Diary — ${fmtDate(entry.createdAt)}\nDuration: ${fmtT(entry.duration || 0)}`;
+
+  const lines = [];
+  if (entry.title) lines.push(entry.title);
+  lines.push(fmtDate(entry.createdAt));
+  if (entry.transcript) { lines.push(''); lines.push(entry.transcript); }
+  else lines.push(`Duration: ${fmtT(entry.duration)}`);
+
+  const text = lines.join('\n');
+
   if (navigator.share) {
-    navigator.share({ title: 'Voice Diary Entry', text }).catch(() => {});
+    navigator.share({ title: entry.title || 'Voice Diary Entry', text }).catch(() => {});
   } else {
     navigator.clipboard?.writeText(text)
-      .then(() => toast('Copied to clipboard ✓'))
+      .then(()  => toast('Copied to clipboard'))
       .catch(() => toast('Share not supported'));
   }
 });
 
-// ══════════════════════════════════════════
-//  AUDIO PLAYER
-// ══════════════════════════════════════════
-function setupPlayer(url, totalSecs) {
+/* ════════════════════════════════════════
+   AUDIO PLAYER
+   — takes a Blob directly, creates URL internally
+   — safe: never crashes if elements missing
+════════════════════════════════════════ */
+function setupPlayer(blob, totalSecs) {
   stopPlayer();
-  const a = $('audioPlayer');
-  a.src   = url;
 
-  $('totalTime').textContent         = fmtT(totalSecs || 0);
-  $('currentTime').textContent       = '00:00';
-  $('waveformProgress').style.width  = '0%';
-  $('playPauseBtn').textContent      = '▶';
+  const url = URL.createObjectURL(blob);
+  const a   = $('audioPlayer');
+  a.src     = url;
 
+  $('totalTime').textContent        = fmtT(totalSecs);
+  $('currentTime').textContent      = '0:00';
+  $('waveformProgress').style.width = '0%';
+  setPlayIcon(false);
   buildWaveformBars();
 
   a.onloadedmetadata = () => {
-    if (a.duration && isFinite(a.duration))
+    if (isFinite(a.duration) && a.duration > 0)
       $('totalTime').textContent = fmtT(a.duration);
   };
+
   a.ontimeupdate = () => {
-    const dur = a.duration || totalSecs || 1;
+    const dur = (isFinite(a.duration) && a.duration > 0) ? a.duration : (totalSecs || 1);
     $('waveformProgress').style.width = (a.currentTime / dur * 100) + '%';
     $('currentTime').textContent = fmtT(a.currentTime);
   };
+
   a.onended = () => {
-    $('playPauseBtn').textContent = '▶';
+    setPlayIcon(false);
     $('waveformProgress').style.width = '0%';
   };
+
+  S.playerActive = true;
 }
 
 function buildWaveformBars() {
   const bars = $('waveformBars');
+  if (!bars) return;
   bars.innerHTML = '';
   for (let i = 0; i < 36; i++) {
     const b = document.createElement('div');
     b.className    = 'waveform-bar';
-    b.style.height = (20 + Math.random() * 60) + '%';
+    b.style.height = (18 + Math.random() * 64) + '%';
     bars.appendChild(b);
   }
 }
 
 $('playPauseBtn').addEventListener('click', () => {
   const a = $('audioPlayer');
-  if (!a.src) return;
-  if (a.paused) { a.play(); $('playPauseBtn').textContent = '⏸'; }
-  else          { a.pause(); $('playPauseBtn').textContent = '▶'; }
+  if (!a || !a.src || a.src === window.location.href) return;  // no src loaded
+  if (a.paused) {
+    a.play().then(() => setPlayIcon(true)).catch(err => console.warn(err));
+  } else {
+    a.pause();
+    setPlayIcon(false);
+  }
 });
 
 $('waveformTrack').addEventListener('click', e => {
   const a = $('audioPlayer');
-  if (!a.duration) return;
+  if (!a || !isFinite(a.duration) || a.duration === 0) return;
   const r = $('waveformTrack').getBoundingClientRect();
-  a.currentTime = ((e.clientX - r.left) / r.width) * a.duration;
+  a.currentTime = Math.max(0, Math.min(((e.clientX - r.left) / r.width) * a.duration, a.duration));
 });
 
-function stopPlayer() {
-  const a = $('audioPlayer');
-  a.pause();
-  a.src = '';
-  $('playPauseBtn').textContent     = '▶';
-  $('waveformProgress').style.width = '0%';
-}
-
-// ══════════════════════════════════════════
-//  GROQ WHISPER
-// ══════════════════════════════════════════
+/* ════════════════════════════════════════
+   GROQ WHISPER — STT
+════════════════════════════════════════ */
 async function groqTranscribe(blob, key, mimeType) {
   const ext = mimeToExt(mimeType);
   const fd  = new FormData();
@@ -603,26 +781,29 @@ async function groqTranscribe(blob, key, mimeType) {
       signal:  ctrl.signal,
     });
     clearTimeout(timer);
-    if (!r.ok) { const e = await r.text(); throw new Error(`Groq ${r.status}: ${e}`); }
+    if (!r.ok) {
+      const txt = await r.text().catch(() => '');
+      throw new Error(`Groq ${r.status}: ${txt}`);
+    }
     const d = await r.json();
     return (d.text || '').trim();
   } catch (err) {
     clearTimeout(timer);
-    if (err.name === 'AbortError') throw new Error('Transcription timed out');
+    if (err.name === 'AbortError') throw new Error('Transcription timed out after 45s');
     throw err;
   }
 }
 
-// ── Manual Transcribe button ──
+// Manual Transcribe button
 $('sttBtn').addEventListener('click', async () => {
-  if (!LS.groqKey) { toast('Add Groq API key in ⚙ Settings'); return; }
+  if (!LS.groqKey) { toast('Add your Groq API key in Settings'); return; }
   if (!S.currentId) { toast('No entry loaded'); return; }
 
   const audioRec = await idbGet('audio', S.currentId);
   if (!audioRec || !audioRec.blob) { toast('No audio found for this entry'); return; }
 
   $('sttBtn').disabled    = true;
-  $('sttBtn').textContent = '⏳ Transcribing…';
+  $('sttBtn').textContent = 'Transcribing…';
   $('transcriptStatus').textContent = 'Sending to Groq Whisper…';
 
   try {
@@ -630,45 +811,46 @@ $('sttBtn').addEventListener('click', async () => {
     if (text) {
       $('transcriptPlaceholder').classList.add('hidden');
       $('transcriptText').textContent = text;
-      $('transcriptStatus').textContent = '✓ Transcription complete';
+      $('transcriptStatus').textContent = 'Transcription complete';
       await persistTranscript(text);
     } else {
       $('transcriptStatus').textContent = 'No speech detected';
     }
   } catch (err) {
-    $('transcriptStatus').textContent = `⚠ ${err.message}`;
+    $('transcriptStatus').textContent = err.message;
   } finally {
     $('sttBtn').disabled    = false;
-    $('sttBtn').textContent = '🎙 Transcribe';
+    $('sttBtn').textContent = 'Transcribe';
   }
 });
 
-// ══════════════════════════════════════════
-//  AI POLISH — GROQ LLM
-// ══════════════════════════════════════════
+/* ════════════════════════════════════════
+   AI POLISH — Groq LLM
+════════════════════════════════════════ */
 $('polishBtn').addEventListener('click', async () => {
-  const raw = $('transcriptText').textContent.trim();
-  if (!raw)         { toast('Transcribe the audio first'); return; }
-  if (!LS.groqKey)  { toast('Add Groq API key in ⚙ Settings'); return; }
+  const raw = ($('transcriptText').textContent || '').trim();
+  if (!raw)        { toast('Transcribe the audio first'); return; }
+  if (!LS.groqKey) { toast('Add your Groq API key in Settings'); return; }
 
   $('polishBtn').disabled    = true;
-  $('polishBtn').textContent = '⏳ Polishing…';
-  $('transcriptStatus').textContent = 'AI is polishing your entry…';
+  $('polishBtn').textContent = 'Polishing…';
+  $('transcriptStatus').textContent = 'Polishing with AI…';
 
   try {
     const r = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method:  'POST',
       headers: { 'Authorization': `Bearer ${LS.groqKey}`, 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'llama-3.1-70b-versatile',
+        model: 'llama-3.3-70b-versatile',
         messages: [
           {
             role: 'system',
-            content: "You are a personal diary editor. The user spoke a diary entry that was auto-transcribed. Fix punctuation, remove filler words (um, uh, like, you know), fix grammar, and make it flow naturally as a personal diary entry. Preserve the user's voice, tone, emotions and all content exactly. Return ONLY the polished text — no commentary, no preamble.",
+            content: "You are a personal diary editor. The user spoke a diary entry that was auto-transcribed. Fix punctuation, remove filler words (um, uh, like, you know), correct grammar, and make it flow naturally as a personal diary entry. Preserve the user's voice, tone, emotions and all content exactly. Return ONLY the polished text — no commentary, no preamble.",
           },
           { role: 'user', content: raw },
         ],
         temperature: 0.35,
+        max_tokens:  1200,
       }),
     });
 
@@ -678,29 +860,29 @@ $('polishBtn').addEventListener('click', async () => {
     }
 
     const data     = await r.json();
-    const polished = data.choices?.[0]?.message?.content?.trim() || '';
+    const polished = (data.choices?.[0]?.message?.content || '').trim();
 
     if (polished) {
       $('transcriptText').textContent = polished;
-      $('transcriptStatus').textContent = '✨ Entry polished';
+      $('transcriptStatus').textContent = 'Entry polished';
       await persistTranscript(polished);
     } else {
-      $('transcriptStatus').textContent = 'Could not polish';
+      $('transcriptStatus').textContent = 'Could not polish — try again';
     }
   } catch (err) {
-    $('transcriptStatus').textContent = `⚠ ${err.message}`;
+    $('transcriptStatus').textContent = err.message;
   } finally {
     $('polishBtn').disabled    = false;
-    $('polishBtn').textContent = '✨ AI Polish';
+    $('polishBtn').textContent = 'AI Polish';
   }
 });
 
-// ── Auto-save transcript on manual edit ──
+// Auto-save transcript on manual edit
 $('transcriptText').addEventListener('input', () => {
-  const text = $('transcriptText').textContent.trim();
+  const text = ($('transcriptText').textContent || '').trim();
   $('transcriptPlaceholder').classList.toggle('hidden', !!text);
-  clearTimeout($('transcriptText')._t);
-  $('transcriptText')._t = setTimeout(() => persistTranscript(text), 1500);
+  clearTimeout($('transcriptText')._saveTimer);
+  $('transcriptText')._saveTimer = setTimeout(() => persistTranscript(text), 1500);
 });
 
 async function persistTranscript(text) {
@@ -710,12 +892,14 @@ async function persistTranscript(text) {
     if (!entry) return;
     entry.transcript = text;
     await idbSetEntry(entry);
-  } catch (e) { console.warn('Transcript save failed', e); }
+  } catch (e) {
+    console.warn('Transcript save failed', e);
+  }
 }
 
-// ══════════════════════════════════════════
-//  INIT
-// ══════════════════════════════════════════
+/* ════════════════════════════════════════
+   INIT
+════════════════════════════════════════ */
 (async () => {
   await openDB();
   initLock();
