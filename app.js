@@ -901,6 +901,9 @@ async function persistTranscript(text) {
    INIT
 ════════════════════════════════════════ */
 (async () => {
+  if (navigator.storage && navigator.storage.persist) {
+    await navigator.storage.persist();
+  }
   await openDB();
   initLock();
 })();
