@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#121214" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/png" href="logo.jpeg">
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <title>SpeakUp</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Nunito:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body data-screen="lock">
+
+  <!-- ═════════ LOCK ═════════ -->
+  <div id="lockScreen" class="screen active">
+    <div class="lock-content">
+      <div class="lock-brand">
+        <div class="lock-wordmark">SpeakUp</div>
+        <div class="lock-tagline">Your daily speaking practice</div>
+      </div>
+      <p class="pin-label" id="pinLabel">Enter your PIN</p>
+      <div class="pin-dots">
+        <div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div><div class="pin-dot"></div>
+      </div>
+      <p class="pin-hint" id="pinHint"></p>
+      <div class="numpad">
+        <button class="num-btn" data-num="1">1</button>
+        <button class="num-btn" data-num="2">2</button>
+        <button class="num-btn" data-num="3">3</button>
+        <button class="num-btn" data-num="4">4</button>
+        <button class="num-btn" data-num="5">5</button>
+        <button class="num-btn" data-num="6">6</button>
+        <button class="num-btn" data-num="7">7</button>
+        <button class="num-btn" data-num="8">8</button>
+        <button class="num-btn" data-num="9">9</button>
+        <button class="num-btn ghost" data-num="del">&#9003;</button>
+        <button class="num-btn" data-num="0">0</button>
+        <button class="num-btn ghost" data-num="ok">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═════════ HOME ═════════ -->
+  <div id="homeScreen" class="screen">
+    <div class="home-header">
+      <div>
+        <div class="muted" id="homeDate"></div>
+        <h1 class="h1">SpeakUp</h1>
+      </div>
+      <div class="hdr-actions">
+        <button class="icon-btn" id="homeSettingsBtn" aria-label="Settings">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <button class="icon-btn" id="homeLockBtn" aria-label="Lock">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="3"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="card stats">
+      <div><div class="stat-num mint" id="statStreak">0</div><div class="muted">day streak</div></div>
+      <div><div class="stat-num" id="statTopics">0</div><div class="muted">topics so far</div></div>
+      <div><div class="stat-num" id="statToday">0m</div><div class="muted">today</div></div>
+    </div>
+
+    <div class="section-label">PAST DAYS</div>
+    <div class="days-list" id="daysList"></div>
+  </div>
+
+  <!-- ═════════ SESSION ═════════ -->
+  <div id="sessionScreen" class="screen" data-state="idle">
+    <div class="top-row">
+      <button class="icon-btn" id="sessionBack" aria-label="Back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <span class="muted" id="topicCounter">Topic 1 today</span>
+    </div>
+
+    <div class="topic-card" id="topicCard">
+      <div class="muted label">YOUR TOPIC</div>
+      <p class="topic-text" id="topicText">Tap the button below and a fresh topic appears here.</p>
+    </div>
+
+        <div class="session-center">
+      <div class="stage">
+        <div class="rec-circle on-live" id="recCircle">
+          <div class="rec-inner">
+            <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
+          </div>
+        </div>
+        <div class="done-circle on-done">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4 4L19 7"/></svg>
+        </div>
+        <button class="btn-mint big on-idle" id="generateBtn">Generate topic</button>
+        <button class="btn-mint big on-ready" id="startBtn">Start recording</button>
+      </div>
+
+      <div class="timer" id="timerText">00:00</div>
+
+      <div class="under">
+        <button class="btn-outline on-live" id="pauseBtn">Pause</button>
+        <div class="muted on-done on-ready" id="sessionStatus"></div>
+      </div>
+    </div>
+
+    <div class="session-actions">
+      <div class="row2">
+        <button class="btn-dark" id="finishBtn" disabled>Finish</button>
+        <button class="btn-dark" id="nextBtn" disabled>Next topic</button>
+      </div>
+      <button class="btn-outline wide" id="endBtn">End for today</button>
+    </div>
+  </div>
+
+  <!-- ═════════ RESULTS ═════════ -->
+  <div id="resultsScreen" class="screen">
+    <div class="top-row">
+      <button class="icon-btn" id="resultsBack" aria-label="Back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+    <div class="results-head">
+      <div class="muted" id="resultsMeta"></div>
+      <h1 class="h1" id="resultsTitle">Today's practice</h1>
+    </div>
+    <div class="tabs" id="tabsRow"></div>
+    <div class="results-body" id="resultsBody"></div>
+  </div>
+
+  <!-- ═════════ WORDS ═════════ -->
+  <div id="wordsScreen" class="screen">
+    <div class="home-header">
+      <div>
+        <div class="muted">New every day</div>
+        <h1 class="h1">Words</h1>
+      </div>
+    </div>
+    <div class="words-list" id="wordsList"></div>
+  </div>
+
+  <!-- ═════════ SETTINGS ═════════ -->
+  <div id="settingsScreen" class="screen">
+    <div class="top-row">
+      <button class="icon-btn" id="settingsBack" aria-label="Back">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+      <h2 class="nav-title">Settings</h2>
+      <span style="width:44px"></span>
+    </div>
+
+    <div class="settings-body">
+
+      <div class="settings-group">
+        <div class="section-label">AI KEY</div>
+        <div class="card settings-card">
+          <div class="s-label">Groq API key</div>
+          <div class="s-desc">Used for speech-to-text, topics and feedback. Free at console.groq.com</div>
+          <input type="password" id="groqKeyInput" class="field" placeholder="gsk_..." autocomplete="off" />
+          <button class="btn-mint small" id="saveGroqBtn">Save key</button>
+          <p class="field-msg" id="groqSaveMsg"></p>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="section-label">MODELS</div>
+        <div class="card settings-card">
+          <div class="s-label">Choose your models</div>
+          <div class="s-desc">If a model stops working, pick another here. Your data is not affected.</div>
+
+          <label class="s-sub">Speech-to-text model</label>
+          <select id="sttModelSelect" class="field"></select>
+          <input type="text" id="sttModelManual" class="field" placeholder="or type a model name" autocomplete="off" />
+
+          <label class="s-sub">Text model (topics, polish, feedback)</label>
+          <select id="llmModelSelect" class="field"></select>
+          <input type="text" id="llmModelManual" class="field" placeholder="or type a model name" autocomplete="off" />
+
+          <div class="row2">
+            <button class="btn-outline small" id="refreshModelsBtn">Refresh list</button>
+            <button class="btn-mint small" id="saveModelsBtn">Save models</button>
+          </div>
+          <p class="field-msg" id="modelsMsg"></p>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="section-label">SECURITY</div>
+        <div class="card settings-card">
+          <div class="s-label">Change PIN</div>
+          <input type="password" id="currentPinInput" class="field" maxlength="4" inputmode="numeric" placeholder="Current PIN" autocomplete="off" />
+          <input type="password" id="newPinInput" class="field" maxlength="4" inputmode="numeric" placeholder="New 4-digit PIN" autocomplete="off" />
+          <button class="btn-mint small" id="savePinBtn">Update PIN</button>
+          <p class="field-msg" id="pinSaveMsg"></p>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="section-label">BACKUP</div>
+        <div class="card settings-card">
+          <div class="s-label">Keep your recordings safe</div>
+          <div class="s-desc">A backup file downloads when you tap End for today. Restore brings everything back if Chrome ever clears the data.</div>
+          <div class="row2">
+            <button class="btn-mint small" id="backupBtn">Backup now</button>
+            <button class="btn-outline small" id="restoreBtn">Restore</button>
+          </div>
+          <input type="file" id="restoreFile" accept=".json,application/json" multiple hidden />
+          <p class="field-msg" id="backupMsg"></p>
+        </div>
+      </div>
+
+      <div class="settings-group">
+        <div class="section-label">DATA</div>
+        <div class="card settings-card">
+          <div class="s-label">Delete everything</div>
+          <div class="s-desc">Permanent. Make a backup first.</div>
+          <button class="btn-danger small" id="deleteAllBtn">Delete everything</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═════════ SHARED: FAB + BOTTOM NAV (home & words only) ═════════ -->
+  <button class="fab" id="newSessionBtn" aria-label="Start practice">
+    <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3z"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3"/></svg>
+  </button>
+  <nav class="bottom-nav" id="bottomNav">
+    <button class="nav-item" data-go="home">Home</button>
+    <span class="nav-gap"></span>
+    <button class="nav-item" data-go="words">Words</button>
+  </nav>
+
+  <audio id="audioPlayer" preload="metadata"></audio>
+  <script src="js/db.js"></script>
+  <script src="js/settings.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/groq.js"></script>
+  <script src="js/session.js"></script>
+  <script src="js/results.js"></script>
+  <script src="js/words.js"></script>
+  <script src="js/backup.js"></script>
+  <!-- Scripts get added here, chunk by chunk -->
+</body>
+</html>
